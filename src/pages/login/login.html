@@ -1,0 +1,23 @@
+<div ng-hide="loginCtrl.checkedPass" class="col-md-12 text-center" style="height:100%;display: flex;align-items: center;justify-content: center;">
+  <span style="color:white;max-width:50%;font-size:5em;width:75px;height:75px;line-height:1" class="glyphicon glyphicon-repeat gly-spin"></span>
+</div>
+
+<div ng-show="loginCtrl.checkedPass" class="container">
+  <div class="row">
+    <div class="col-sm-12 col-md-8 col-lg-6 col-md-offset-2 col-lg-offset-3">
+      <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Contraseña</h4>
+            </div>
+            <div class="modal-body">
+                <div class="input-group" style="width:100%">
+                    <input ng-keyup="$event.keyCode == 13 && loginCtrl.login()" type="password" class="form-control" maxlength="15" placeholder="Password" ng-model="password" value="" style="width:100%">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-block" ng-click="loginCtrl.login()" data-dismiss="modal">Ingresar</button>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>

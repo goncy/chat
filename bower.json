@@ -1,8 +1,8 @@
 {
-  "name": "angular-seed",
-  "description": "A starter project for AngularJS",
+  "name": "chat",
+  "description": "Chat por Gonzalo Pozzo",
   "version": "0.0.0",
-  "homepage": "https://github.com/angular/angular-seed",
+  "homepage": "https://github.com/goncy/chat",
   "license": "MIT",
   "private": true,
   "dependencies": {
@@ -13,7 +13,11 @@
     "html5-boilerplate": "~5.2.0",
     "pusher-angular": "~0.1.8",
     "ng-file-upload-shim": "~11.0.0",
-    "ng-file-upload": "~11.0.0"
+    "ng-file-upload": "~11.0.0",
+    "fancyBox": "~2.1.5",
+    "PACE": "pace#~1.0.2",
+    "bootstrap": "~3.3.6",
+    "angular-sanitize": "~1.4.8"
   },
   "resolutions": {
     "jquery": "1.9.1 - 2"

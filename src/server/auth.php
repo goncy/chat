@@ -35,7 +35,7 @@
   	$stmt-> bind_result($col1);
 
   	while ($stmt-> fetch()) {
-  		if($col1 == $password){
+  		if($col1 == $password || empty($col1)){
         echo $pusher->presence_auth($_POST['channel_name'], $_POST['socket_id'], "srpao-".$_POST['socket_id'], "");
   		}else{
         echo "false";

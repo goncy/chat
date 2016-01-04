@@ -11,8 +11,8 @@ if ($con->connect_error) {
 $postdata = file_get_contents("php://input");
 $request = json_decode($postdata,true);
 
-if(!isset( $request['sala'], $request['password'])){
-	echo "Ingrese una contraseña por favor";
+if(!isset( $request['sala'])){
+	echo "Ingrese una sala por favor";
 }else{
 	$sala = $request['sala'];
 	$password = $request['password'];
@@ -24,12 +24,10 @@ if(!isset( $request['sala'], $request['password'])){
 	$stmt-> bind_result($col1);
 
 	while ($stmt-> fetch()) {
-		if($col1 == $password){
+		if($col1 == $password || empty($col1)){
       echo "true";
-			//$_SESSION['sala'] = $sala;
 		}else{
       echo "false";
-			//$message = "El password es incorrecto";
 		}
 	}
 
