@@ -7,9 +7,15 @@
   "private": true,
   "dependencies": {
     "angular": "~1.4.0",
-    "angular-route": "~1.4.0",
     "angular-loader": "~1.4.0",
     "angular-mocks": "~1.4.0",
-    "html5-boilerplate": "~5.2.0"
+    "angular-route": "~1.4.0",
+    "html5-boilerplate": "~5.2.0",
+    "pusher-angular": "~0.1.8",
+    "ng-file-upload-shim": "~11.0.0",
+    "ng-file-upload": "~11.0.0"
+  },
+  "resolutions": {
+    "jquery": "1.9.1 - 2"
   }
 }
