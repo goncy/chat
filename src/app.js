@@ -13,7 +13,7 @@
 
   function ChatAppConfig($routeProvider) {
     $routeProvider.otherwise({
-      redirectTo: '/login'
+      redirectTo: '/login/principal'
     });
   }
 })();

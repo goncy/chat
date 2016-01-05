@@ -1,0 +1,53 @@
+<!-- Config Modal -->
+<div id="configModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Configuracion</h4>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="c_name">Nombre:</label>
+                    <input id="c_name" type="text" class="form-control" maxlength="15" placeholder="Nombre" ng-model="chatCtrl.user.name" value="{{chatCtrl.user.name}}">
+                </div>
+                <hr>
+                <div class="input-group">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" name="vehicle" id="c_sv_notif" checked>Recibir notificaciones del servidor</label>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" name="vehicle" id="c_cnx_notif" checked>Recibir notificaciones del des/conexiones</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Modal -->
+<div id="alertModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Notificación</h4>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <p id="alertError"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

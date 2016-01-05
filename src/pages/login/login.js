@@ -6,17 +6,17 @@
     .controller('loginController', loginController);
 
   loginConfig.$inject = ["$routeProvider"];
-  loginController.$inject = ["$http", "$scope", "$location"];
+  loginController.$inject = ["$http", "$scope", "$location", "$routeParams"];
 
   function loginConfig($routeProvider) {
-    $routeProvider.when('/login', {
+    $routeProvider.when('/login/:sala', {
       templateUrl: 'pages/login/login.html',
       controller: 'loginController',
       controllerAs: 'loginCtrl'
     });
   }
 
-  function loginController($http, $scope, $location) {
+  function loginController($http, $scope, $location, $routeParams) {
     var loginCtrl = this;
 
     loginCtrl.checkedPass = false;
@@ -31,14 +31,14 @@
 
     function login() {
       $http.post('server/login.php', {
-          sala: "srpao",
+          sala: $routeParams.sala.toLowerCase(),
           password: $scope.password
         })
         .then(function(res) {
           if(res.data === "true") {
             $location.path('/chat')
               .search({
-                sala: 'srpao',
+                sala: $routeParams.sala.toLowerCase(),
                 password: $scope.password
               });
           } else {

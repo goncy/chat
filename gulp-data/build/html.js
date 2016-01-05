@@ -5,8 +5,12 @@ var gulp = require('gulp'),
     livereload      = require('gulp-livereload');
 
 gulp.task('build:html', function(){
-  return gulp.src('./src/*.{html,nunjucks}')
+  var app = gulp.src('./src/*.{html,nunjucks}')
     .pipe(gulpif(argv.env === "prod" || argv.env === "stg", minifyHTML()))
-    .pipe(gulp.dest('./dist/'))
+    .pipe(gulp.dest('./dist/'));
+
+  var pages = gulp.src('./src/pages/**/*.html')
+    .pipe(gulpif(argv.env === "prod" || argv.env === "stg", minifyHTML()))
+    .pipe(gulp.dest('./dist/pages/'))
     .pipe(livereload());
 });

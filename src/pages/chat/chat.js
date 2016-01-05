@@ -72,7 +72,7 @@
         authEndpoint: 'server/auth.php',
         auth: {
           headers: {
-            'X-CSRF-Token': "srpao"
+            'X-CSRF-Token': "{'dev':'Gonzalo Pozzo'}"
           },
           params: {
             'sala': $routeParams.sala,
@@ -81,8 +81,12 @@
         }
       }));
 
+      //Chat name
+      chatCtrl.name = $routeParams.sala.toUpperCase();
+      chatCtrl.slug = $routeParams.sala.toLowerCase();
+
       //Channel
-      chatCtrl.channel = chatCtrl.pusher.subscribe('presence-srpao');
+      chatCtrl.channel = chatCtrl.pusher.subscribe('presence-' + chatCtrl.slug);
 
       //Bind events
       bindEvents();
@@ -98,7 +102,7 @@
         chatCtrl.channel.bind('pusher:subscription_succeeded', function(members) {
           chatCtrl.messages.push({
             "name": "server",
-            "msg": "Bienvenido a <strong>SRPAO Chat</strong> hay " + strong(members.count) + " personas en la sala",
+            "msg": "Bienvenido al chat de "+ strong(chatCtrl.slug) +", hay " + strong(members.count) + " personas en la sala",
             "src": "server"
           });
           goBottom();
@@ -202,6 +206,7 @@
         });
         file.upload.then(function(response) {
           $timeout(function() {
+            console.log(response);
             file.result = response.data;
 
             var data = {

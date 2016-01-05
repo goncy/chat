@@ -4,13 +4,22 @@ var gulp      = require('gulp'),
     minifyCss = require('gulp-cssnano'),
     gulpif = require('gulp-if'),
     argv = require('yargs').default('env', 'local').argv,
-    livereload      = require('gulp-livereload');
+    livereload = require('gulp-livereload'),
+    es = require('event-stream');
 
-gulp.task('build:css', function() {
-  return gulp.src('./src/{sass,css}/**/*.{scss,css}')
-    .pipe(sass())
-    .pipe(concat('etermax.css'))
-    .pipe(gulpif(argv.env === "prod" || argv.env === "stg", minifyCss()))
-    .pipe(gulp.dest('./dist/css/'))
-    .pipe(livereload());
+var vendorFilesCss = [
+  "./src/bower_components/fancyBox/source/jquery.fancybox.css",
+  "./src/bower_components/PACE/themes/green/pace-theme-minimal.css",
+];
+
+gulp.task('build:css', function(){
+  return es.concat(
+    gulp.src(vendorFilesCss),
+    gulp.src(['./src/pages/**/*.{css,scss}','./src/app.css'])
+  )
+  .pipe(sass())
+  .pipe(concat('chat.css'))
+  .pipe(gulpif(argv.env === "prod" || argv.env === "stg", minifyCss()))
+  .pipe(gulp.dest('./dist/css/'))
+  .pipe(livereload());
 });

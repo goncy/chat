@@ -14,7 +14,7 @@ gulp.task('clean', ["clean:all"]);
 gulp.task('copy', function(cb){
   runSequence(
     "clean",
-    ["copy:fonts", "copy:img"],
+    ["copy:fonts", "copy:img", "copy:server"],
     cb);
 });
 
@@ -23,8 +23,7 @@ gulp.task('build', function(cb){
   runSequence(
     ["clean", "copy"],
     ["build:html", "build:css", "build:js"],
-    cb)
-    .pipe(livereload());
+    cb);
 });
 
 //Watch
@@ -32,5 +31,7 @@ gulp.task('watch', function () {
   livereload.listen();
   gulp.watch(['src/**/*.html'], ['build:html']);
   gulp.watch(['src/**/*.{css,scss}'], ['build:css']);
-  gulp.watch(['src/**/*.{js,cofee}'], ['build:js']);
+  gulp.watch(['src/**/*.{js,coffee}'], ['build:js']);
+  gulp.watch(['src/**/*.{jpg,png}'], ['copy:img']);
+  gulp.watch(['src/**/*.{php}'], ['copy:server']);
 });
