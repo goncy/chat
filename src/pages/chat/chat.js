@@ -2,26 +2,14 @@
   'use strict';
 
   //Module
-  angular.module('ChatApp.chat', ['ngRoute'])
-
-    .config(chatConfig)
+  angular.module('ChatApp.chat', [])
 
     .directive('chatNav', chatNav)
     .directive('chatModals', chatModals)
 
     .controller('chatController', chatController);
 
-  chatConfig.$inject = ['$routeProvider'];
-  chatController.$inject = ['$scope', '$timeout', '$pusher', 'Upload', '$routeParams'];
-
-  //Config
-  function chatConfig($routeProvider) {
-    $routeProvider.when('/chat', {
-      templateUrl: 'pages/chat/chat.html',
-      controller: 'chatController',
-      controllerAs: 'chatCtrl'
-    });
-  }
+  chatController.$inject = ['$scope', '$timeout', '$pusher', 'Upload', '$routeParams', 'apiFactory'];
 
   //Directives
   function chatNav() {
@@ -36,7 +24,7 @@
     };
   }
 
-  function chatController($scope, $timeout, $pusher, Upload, $routeParams) {
+  function chatController($scope, $timeout, $pusher, Upload, $routeParams, apiFactory) {
     var chatCtrl = this;
 
     chatCtrl.sendMessage = sendMessage;
@@ -52,6 +40,8 @@
       name: "Anonimo",
       uid: ""
     }
+
+    chatCtrl.partner = false;
 
     chatCtrl.config = {
       conexNotif: true,
@@ -76,7 +66,7 @@
           },
           params: {
             'sala': $routeParams.sala,
-            'password': $routeParams.password
+            'password': apiFactory.getPassword()
           }
         }
       }));
@@ -87,6 +77,9 @@
 
       //Channel
       chatCtrl.channel = chatCtrl.pusher.subscribe('presence-' + chatCtrl.slug);
+
+      //Partner
+      chatCtrl.partner = apiFactory.getPartner() === "true" ? true : false;
 
       //Bind events
       bindEvents();
@@ -206,7 +199,6 @@
         });
         file.upload.then(function(response) {
           $timeout(function() {
-            console.log(response);
             file.result = response.data;
 
             var data = {

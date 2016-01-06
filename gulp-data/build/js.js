@@ -1,11 +1,12 @@
-var gulp = require('gulp');
-    argv = require('yargs').default('env', 'local').argv,
-    gulpif = require('gulp-if'),
-    concat = require('gulp-concat'),
-    uglify = require('gulp-uglify'),
-    source = require('vinyl-source-stream'),
-    livereload = require('gulp-livereload'),
-    es = require('event-stream');
+var
+  gulp       = require('gulp'),
+  argv       = require('yargs').default('env', 'local').argv,
+  gulpif     = require('gulp-if'),
+  concat     = require('gulp-concat'),
+  uglify     = require('gulp-uglify'),
+  source     = require('vinyl-source-stream'),
+  livereload = require('gulp-livereload'),
+  es         = require('event-stream');
 
 var vendorFiles = [
   "./src/bower_components/angular/angular.js",
@@ -19,13 +20,13 @@ var vendorFiles = [
   "./src/bower_components/PACE/pace.js"
 ];
 
-gulp.task('build:js', function(){
+gulp.task('build:js', function() {
   return es.concat(
-    gulp.src(vendorFiles),
-    gulp.src(['./src/pages/**/*.{js,coffee}','./src/app.js'])
-  )
-  .pipe(gulpif(argv.env === "prod" || argv.env === "stg", uglify()))
-  .pipe(concat("chat.js"))
-  .pipe(gulp.dest('./dist/js/'))
-  .pipe(livereload());
+      gulp.src(vendorFiles),
+      gulp.src(['./src/pages/**/*.{js,coffee}', './src/app.js', './src/components/**/*.{js,coffee}'])
+    )
+    .pipe(gulpif(argv.env === "prod" || argv.env === "stg", uglify()))
+    .pipe(concat("chat.js"))
+    .pipe(gulp.dest('./dist/js/'))
+    .pipe(livereload());
 });

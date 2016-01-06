@@ -1,22 +1,22 @@
-var gulp  = require('gulp'),
-    del   = require('del');
+var gulp = require('gulp'),
+    del = require('del');
 
 // CSS
 gulp.task('clean:css', function() {
-  return del('./dist/css/**');
+    return del('./dist/css/**');
 });
 
 // JS
 gulp.task('clean:js', function() {
-  return del('./dist/js/**');
+    return del('./dist/js/**');
 });
 
 // IMG
 gulp.task('clean:img', function() {
-  return del('./dist/img/**');
+    return del('./dist/img/**');
 });
 
 // ALL
 gulp.task('clean:all', function() {
-  return del(['./dist/**/*', './dist/']);
+    return del(['./dist/**/*', './dist/']);
 });

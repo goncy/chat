@@ -1,22 +1,12 @@
 (function() {
   'use strict';
 
-  angular.module('ChatApp.login', ['ngRoute'])
-    .config(loginConfig)
+  angular.module('ChatApp.login', [])
     .controller('loginController', loginController);
 
-  loginConfig.$inject = ["$routeProvider"];
-  loginController.$inject = ["$http", "$scope", "$location", "$routeParams"];
+  loginController.$inject = ["$scope", "$location", "$routeParams", "apiFactory"];
 
-  function loginConfig($routeProvider) {
-    $routeProvider.when('/login/:sala', {
-      templateUrl: 'pages/login/login.html',
-      controller: 'loginController',
-      controllerAs: 'loginCtrl'
-    });
-  }
-
-  function loginController($http, $scope, $location, $routeParams) {
+  function loginController($scope, $location, $routeParams, apiFactory) {
     var loginCtrl = this;
 
     loginCtrl.checkedPass = false;
@@ -26,28 +16,32 @@
     iniciar();
 
     function iniciar() {
-      login();
+      hasPassword();
+    }
+
+    function hasPassword() {
+      apiFactory.hasPassword($routeParams.sala.toLowerCase())
+        .then(function(res) {
+          if (res.data.status === "false") {
+            $location.path('/' + $routeParams.sala.toLowerCase() + '/chat');
+          }
+          loginCtrl.checkedPass = true;
+        });
     }
 
     function login() {
-      $http.post('server/login.php', {
-          sala: $routeParams.sala.toLowerCase(),
-          password: $scope.password
-        })
+      apiFactory.login($routeParams.sala.toLowerCase(), $scope.password)
         .then(function(res) {
-          if(res.data === "true") {
-            $location.path('/chat')
-              .search({
-                sala: $routeParams.sala.toLowerCase(),
-                password: $scope.password
-              });
+          console.log(res.data);
+          if (res.data.status === "true") {
+            apiFactory.setPassword($scope.password);
+            apiFactory.setPartner(res.data.partner);
+            $location.path('/' + $routeParams.sala.toLowerCase() + '/chat');
           } else {
-            if(loginCtrl.checkedPass) alert("Error, la password no es correcta o hubo un error con el servidor");
-            loginCtrl.checkedPass = true;
+            alert("Error, la password no es correcta o hubo un error con el servidor");
           }
         }, function(err) {
-          if(loginCtrl.checkedPass) alert("Error, la password no es correcta o hubo un error con el servidor");
-          loginCtrl.checkedPass = true;
+          alert("Error, la password no es correcta o hubo un error con el servidor");
         });
     }
   }

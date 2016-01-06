@@ -3,7 +3,7 @@
 
   var modules = [
     'ngRoute','ngSanitize','pusher-angular','ngFileUpload',
-    'ChatApp.login','ChatApp.chat'
+    'ChatApp.login','ChatApp.chat', 'ChatApp.api'
   ];
 
   angular.module('ChatApp', modules)
@@ -12,8 +12,21 @@
   ChatAppConfig.$inject = ['$routeProvider'];
 
   function ChatAppConfig($routeProvider) {
-    $routeProvider.otherwise({
-      redirectTo: '/login/principal'
+    //Chat
+    $routeProvider.when('/:sala/chat', {
+      templateUrl: 'pages/chat/chat.html',
+      controller: 'chatController',
+      controllerAs: 'chatCtrl'
+    })
+    //Login
+    .when('/:sala', {
+      templateUrl: 'pages/login/login.html',
+      controller: 'loginController',
+      controllerAs: 'loginCtrl'
+    })
+    //Redirect
+    .otherwise({
+      redirectTo: '/principal'
     });
   }
 })();
