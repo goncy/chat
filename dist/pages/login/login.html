@@ -11,7 +11,7 @@
             </div>
             <div class="modal-body">
                 <div class="input-group" style="width:100%">
-                    <input ng-keyup="$event.keyCode == 13 && loginCtrl.login()" type="password" class="form-control" maxlength="15" placeholder="Password" ng-model="password" value="" style="width:100%">
+                    <input ng-keyup="$event.keyCode == 13 && loginCtrl.login()" type="password" id="passInput" class="form-control" maxlength="15" placeholder="Password" ng-model="password" value="" style="width:100%">
                 </div>
             </div>
             <div class="modal-footer">
@@ -21,3 +21,7 @@
     </div>
   </div>
 </div>
+
+<script>
+  $('#passInput').focus();
+</script>

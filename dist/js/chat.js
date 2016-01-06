@@ -29098,7 +29098,6 @@ $provide.value("$locale", {
 
       //Partner
       chatCtrl.partner = apiFactory.getPartner() === "true" ? true : false;
-      console.log(chatCtrl.partner);
 
       //Bind events
       bindEvents();
@@ -29218,7 +29217,6 @@ $provide.value("$locale", {
         });
         file.upload.then(function(response) {
           $timeout(function() {
-            console.log(response);
             file.result = response.data;
 
             var data = {
