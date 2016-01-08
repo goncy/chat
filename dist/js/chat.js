@@ -29019,251 +29019,48 @@ $provide.value("$locale", {
 (function() {
   'use strict';
 
-  //Module
-  angular.module('ChatApp.chat', [])
+  angular.module('ChatApp.login', [])
+    .controller('loginController', loginController);
 
-    .directive('chatNav', chatNav)
-    .directive('chatModals', chatModals)
+  loginController.$inject = ["$scope", "$location", "$routeParams", "apiFactory"];
 
-    .controller('chatController', chatController);
+  function loginController($scope, $location, $routeParams, apiFactory) {
+    var loginCtrl = this;
 
-  chatController.$inject = ['$scope', '$timeout', '$pusher', 'Upload', '$routeParams', 'apiFactory'];
+    loginCtrl.checkedPass = false;
 
-  //Directives
-  function chatNav() {
-    return {
-      templateUrl: 'pages/chat/partials/nav.html'
-    };
-  }
-
-  function chatModals() {
-    return {
-      templateUrl: 'pages/chat/partials/modals.html'
-    };
-  }
-
-  function chatController($scope, $timeout, $pusher, Upload, $routeParams, apiFactory) {
-    var chatCtrl = this;
-
-    chatCtrl.sendMessage = sendMessage;
-    chatCtrl.uploadFiles = uploadFiles;
-    chatCtrl.previewImage = previewImage;
-
-    //Pusher cfg
-    chatCtrl.pusher = [];
-    chatCtrl.channel = [];
-
-    //Scope
-    chatCtrl.user = {
-      name: "Anonimo",
-      uid: ""
-    }
-
-    chatCtrl.partner = false;
-
-    chatCtrl.config = {
-      conexNotif: true,
-      svNotif: true
-    }
-
-    chatCtrl.users = [];
-
-    //Chat content
-    chatCtrl.messages = [];
+    loginCtrl.login = login;
 
     iniciar();
 
     function iniciar() {
-      //Init
-      chatCtrl.pusher = $pusher(new Pusher('1af1d4c26abef175083a', {
-        encrypted: true,
-        authEndpoint: 'server/auth.php',
-        auth: {
-          headers: {
-            'X-CSRF-Token': "{'dev':'Gonzalo Pozzo'}"
-          },
-          params: {
-            'sala': $routeParams.sala,
-            'password': apiFactory.getPassword()
+      hasPassword();
+    }
+
+    function hasPassword() {
+      apiFactory.hasPassword($routeParams.sala.toLowerCase())
+        .then(function(res) {
+          if (res.data.status === "false") {
+            $location.path('/' + $routeParams.sala.toLowerCase() + '/chat');
           }
-        }
-      }));
-
-      //Chat name
-      chatCtrl.name = $routeParams.sala.toUpperCase();
-      chatCtrl.slug = $routeParams.sala.toLowerCase();
-
-      //Channel
-      chatCtrl.channel = chatCtrl.pusher.subscribe('presence-' + chatCtrl.slug);
-
-      //Partner
-      chatCtrl.partner = apiFactory.getPartner() === "true" ? true : false;
-
-      //Bind events
-      bindEvents();
+          loginCtrl.checkedPass = true;
+        });
     }
 
-    function bindEvents() {
-      chatCtrl.pusher.connection.bind('connected', function() {
-
-        chatCtrl.user.uid = chatCtrl.pusher.connection.socket_id;
-        chatCtrl.user.name = "Anonimo";
-
-        //Sub completed
-        chatCtrl.channel.bind('pusher:subscription_succeeded', function(members) {
-          chatCtrl.messages.push({
-            "name": "server",
-            "msg": "Bienvenido al chat de "+ strong(chatCtrl.slug) +", hay " + strong(members.count) + " personas en la sala",
-            "src": "server"
-          });
-          goBottom();
+    function login() {
+      apiFactory.login($routeParams.sala.toLowerCase(), $scope.password)
+        .then(function(res) {
+          console.log(res.data);
+          if (res.data.status === "true") {
+            apiFactory.setPassword($scope.password);
+            apiFactory.setPartner(res.data.partner);
+            $location.path('/' + $routeParams.sala.toLowerCase() + '/chat');
+          } else {
+            alert("Error, la password no es correcta o hubo un error con el servidor");
+          }
+        }, function(err) {
+          alert("Error, la password no es correcta o hubo un error con el servidor");
         });
-
-        //Sub completed
-        chatCtrl.channel.bind('pusher:subscription_error', function(members) {
-          $('#alertError')
-            .text("Hubo un error al unirse a la sala, posiblemente la contraseña sea incorrecta");
-          $('#alertModal')
-            .modal('show');
-
-          chatCtrl.messages.push({
-            "name": "error",
-            "msg": "Hubo un error al unirse a la sala, por favor, intenta nuevamente mas tarde",
-            "src": "server"
-          });
-          goBottom();
-        });
-
-        //Se unio alguien
-        chatCtrl.channel.bind('pusher:member_added', function(member) {
-          chatCtrl.users.push(member);
-          if (chatCtrl.config.conexNotif) chatCtrl.messages.push({
-            "name": "server",
-            "msg": "Otra persona se unio al chat, hay " + strong(chatCtrl.users.length + 1) + " personas en la sala",
-            "src": "server"
-          });
-          goBottom();
-        });
-
-        //Se fue alguien
-        chatCtrl.channel.bind('pusher:member_removed', function(member) {
-          chatCtrl.users.splice(chatCtrl.users.indexOf(member), 1);
-          if (chatCtrl.config.conexNotif) chatCtrl.messages.push({
-            "name": "server",
-            "msg": "Una persona se fue del chat, hay " + strong(chatCtrl.users.length + 1) + " personas en la sala",
-            "src": "server"
-          });
-          goBottom();
-        });
-
-        //Mensaje nuevo de servidor
-        chatCtrl.channel.bind('new_sv_msg', function(data) {
-          if (chatCtrl.config.svNotif) addMessage(data)
-        });
-
-        //Mensaje nuevo de cliente
-        chatCtrl.channel.bind('client-new_msg', function(data) {
-          addMessage(data)
-        });
-
-      });
-    }
-
-    //Messages functions
-    function sendMessage() {
-      var data = {
-        uid: chatCtrl.user.uid,
-        msg: $scope.msg,
-        name: chatCtrl.user.name,
-      }
-
-      chatCtrl.channel.trigger('client-new_msg', data);
-      chatCtrl.messages.push({
-        src: "self",
-        name: "Yo",
-        msg: $scope.msg
-      });
-      $scope.msg = "";
-
-      goBottom();
-    }
-
-    function addMessage(data) {
-      console.log(data);
-      chatCtrl.messages.push({
-        src: data.src || "other",
-        name: data.name,
-        msg: data.msg
-      });
-      goBottom();
-    }
-
-    //Image
-    function uploadFiles(file, errFiles) {
-      $scope.f = file;
-      $scope.errFile = errFiles && errFiles[0];
-      if ($scope.errFile) {
-        $('#alertError')
-          .text("Hubo un error al enviar el archivo, asegurate de que sea una foto o video y que pese menos de 10MB");
-        $('#alertModal')
-          .modal('show');
-        return;
-      }
-      if (file) {
-        file.upload = Upload.upload({
-          url: 'server/uploadFile.php',
-          file: file,
-          sendFieldsAs: 'form'
-        });
-        file.upload.then(function(response) {
-          $timeout(function() {
-            file.result = response.data;
-
-            var data = {
-              uid: chatCtrl.user.uid,
-              src: "image",
-              msg: response.data.path,
-              name: chatCtrl.user.name,
-            }
-
-            chatCtrl.channel.trigger('client-new_msg', data);
-            chatCtrl.messages.push({
-              src: "image",
-              name: "Yo",
-              msg: response.data.path
-            });
-
-            goBottom();
-          });
-        }, function(response) {
-          if (response.status > 0)
-            $scope.errorMsg = response.status + ': ' + response.data;
-        }, function(evt) {
-          file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
-        });
-      }
-    }
-
-    function previewImage(img, username) {
-      $.fancybox.open([{
-        href: img,
-        title: username
-      }], {
-        padding: 5,
-        closeBtn: true
-      });
-    }
-
-    //Helpers
-    function strong(txt) {
-      return "<strong>" + txt + "</strong>";
-    }
-
-    function goBottom() {
-      setTimeout(function() {
-        $("#chat")
-          .scrollTop($("#chat")[0].scrollHeight);
-      }, 10);
     }
   }
 })();
@@ -30263,48 +30060,251 @@ function ngViewFillContentFactory($compile, $controller, $route) {
 (function() {
   'use strict';
 
-  angular.module('ChatApp.login', [])
-    .controller('loginController', loginController);
+  //Module
+  angular.module('ChatApp.chat', [])
 
-  loginController.$inject = ["$scope", "$location", "$routeParams", "apiFactory"];
+    .directive('chatNav', chatNav)
+    .directive('chatModals', chatModals)
 
-  function loginController($scope, $location, $routeParams, apiFactory) {
-    var loginCtrl = this;
+    .controller('chatController', chatController);
 
-    loginCtrl.checkedPass = false;
+  chatController.$inject = ['$scope', '$timeout', '$pusher', 'Upload', '$routeParams', 'apiFactory'];
 
-    loginCtrl.login = login;
+  //Directives
+  function chatNav() {
+    return {
+      templateUrl: 'pages/chat/partials/nav.html'
+    };
+  }
+
+  function chatModals() {
+    return {
+      templateUrl: 'pages/chat/partials/modals.html'
+    };
+  }
+
+  function chatController($scope, $timeout, $pusher, Upload, $routeParams, apiFactory) {
+    var chatCtrl = this;
+
+    chatCtrl.sendMessage = sendMessage;
+    chatCtrl.uploadFiles = uploadFiles;
+    chatCtrl.previewImage = previewImage;
+
+    //Pusher cfg
+    chatCtrl.pusher = [];
+    chatCtrl.channel = [];
+
+    //Scope
+    chatCtrl.user = {
+      name: "Anonimo",
+      uid: ""
+    }
+
+    chatCtrl.partner = false;
+
+    chatCtrl.config = {
+      conexNotif: true,
+      svNotif: true
+    }
+
+    chatCtrl.users = [];
+
+    //Chat content
+    chatCtrl.messages = [];
 
     iniciar();
 
     function iniciar() {
-      hasPassword();
+      //Init
+      chatCtrl.pusher = $pusher(new Pusher('1af1d4c26abef175083a', {
+        encrypted: true,
+        authEndpoint: 'server/auth.php',
+        auth: {
+          headers: {
+            'X-CSRF-Token': "{'dev':'Gonzalo Pozzo'}"
+          },
+          params: {
+            'sala': $routeParams.sala,
+            'password': apiFactory.getPassword()
+          }
+        }
+      }));
+
+      //Chat name
+      chatCtrl.name = $routeParams.sala.toUpperCase();
+      chatCtrl.slug = $routeParams.sala.toLowerCase();
+
+      //Channel
+      chatCtrl.channel = chatCtrl.pusher.subscribe('presence-' + chatCtrl.slug);
+
+      //Partner
+      chatCtrl.partner = apiFactory.getPartner() === "true" ? true : false;
+
+      //Bind events
+      bindEvents();
     }
 
-    function hasPassword() {
-      apiFactory.hasPassword($routeParams.sala.toLowerCase())
-        .then(function(res) {
-          if (res.data.status === "false") {
-            $location.path('/' + $routeParams.sala.toLowerCase() + '/chat');
-          }
-          loginCtrl.checkedPass = true;
+    function bindEvents() {
+      chatCtrl.pusher.connection.bind('connected', function() {
+
+        chatCtrl.user.uid = chatCtrl.pusher.connection.socket_id;
+        chatCtrl.user.name = "Anonimo";
+
+        //Sub completed
+        chatCtrl.channel.bind('pusher:subscription_succeeded', function(members) {
+          chatCtrl.messages.push({
+            "name": "server",
+            "msg": "Bienvenido al chat de "+ strong(chatCtrl.slug) +", hay " + strong(members.count) + " personas en la sala",
+            "src": "server"
+          });
+          goBottom();
         });
+
+        //Sub completed
+        chatCtrl.channel.bind('pusher:subscription_error', function(members) {
+          $('#alertError')
+            .text("Hubo un error al unirse a la sala, posiblemente la contraseña sea incorrecta");
+          $('#alertModal')
+            .modal('show');
+
+          chatCtrl.messages.push({
+            "name": "error",
+            "msg": "Hubo un error al unirse a la sala, por favor, intenta nuevamente mas tarde",
+            "src": "server"
+          });
+          goBottom();
+        });
+
+        //Se unio alguien
+        chatCtrl.channel.bind('pusher:member_added', function(member) {
+          chatCtrl.users.push(member);
+          if (chatCtrl.config.conexNotif) chatCtrl.messages.push({
+            "name": "server",
+            "msg": "Otra persona se unio al chat, hay " + strong(chatCtrl.users.length + 1) + " personas en la sala",
+            "src": "server"
+          });
+          goBottom();
+        });
+
+        //Se fue alguien
+        chatCtrl.channel.bind('pusher:member_removed', function(member) {
+          chatCtrl.users.splice(chatCtrl.users.indexOf(member), 1);
+          if (chatCtrl.config.conexNotif) chatCtrl.messages.push({
+            "name": "server",
+            "msg": "Una persona se fue del chat, hay " + strong(chatCtrl.users.length + 1) + " personas en la sala",
+            "src": "server"
+          });
+          goBottom();
+        });
+
+        //Mensaje nuevo de servidor
+        chatCtrl.channel.bind('new_sv_msg', function(data) {
+          if (chatCtrl.config.svNotif) addMessage(data)
+        });
+
+        //Mensaje nuevo de cliente
+        chatCtrl.channel.bind('client-new_msg', function(data) {
+          addMessage(data)
+        });
+
+      });
     }
 
-    function login() {
-      apiFactory.login($routeParams.sala.toLowerCase(), $scope.password)
-        .then(function(res) {
-          console.log(res.data);
-          if (res.data.status === "true") {
-            apiFactory.setPassword($scope.password);
-            apiFactory.setPartner(res.data.partner);
-            $location.path('/' + $routeParams.sala.toLowerCase() + '/chat');
-          } else {
-            alert("Error, la password no es correcta o hubo un error con el servidor");
-          }
-        }, function(err) {
-          alert("Error, la password no es correcta o hubo un error con el servidor");
+    //Messages functions
+    function sendMessage() {
+      var data = {
+        uid: chatCtrl.user.uid,
+        msg: $scope.msg,
+        name: chatCtrl.user.name,
+      }
+
+      chatCtrl.channel.trigger('client-new_msg', data);
+      chatCtrl.messages.push({
+        src: "self",
+        name: "Yo",
+        msg: $scope.msg
+      });
+      $scope.msg = "";
+
+      goBottom();
+    }
+
+    function addMessage(data) {
+      console.log(data);
+      chatCtrl.messages.push({
+        src: data.src || "other",
+        name: data.name,
+        msg: data.msg
+      });
+      goBottom();
+    }
+
+    //Image
+    function uploadFiles(file, errFiles) {
+      $scope.f = file;
+      $scope.errFile = errFiles && errFiles[0];
+      if ($scope.errFile) {
+        $('#alertError')
+          .text("Hubo un error al enviar el archivo, asegurate de que sea una foto o video y que pese menos de 10MB");
+        $('#alertModal')
+          .modal('show');
+        return;
+      }
+      if (file) {
+        file.upload = Upload.upload({
+          url: 'server/uploadFile.php',
+          file: file,
+          sendFieldsAs: 'form'
         });
+        file.upload.then(function(response) {
+          $timeout(function() {
+            file.result = response.data;
+
+            var data = {
+              uid: chatCtrl.user.uid,
+              src: "image",
+              msg: response.data.path,
+              name: chatCtrl.user.name,
+            }
+
+            chatCtrl.channel.trigger('client-new_msg', data);
+            chatCtrl.messages.push({
+              src: "image",
+              name: "Yo",
+              msg: response.data.path
+            });
+
+            goBottom();
+          });
+        }, function(response) {
+          if (response.status > 0)
+            $scope.errorMsg = response.status + ': ' + response.data;
+        }, function(evt) {
+          file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+        });
+      }
+    }
+
+    function previewImage(img, username) {
+      $.fancybox.open([{
+        href: img,
+        title: username
+      }], {
+        padding: 5,
+        closeBtn: true
+      });
+    }
+
+    //Helpers
+    function strong(txt) {
+      return "<strong>" + txt + "</strong>";
+    }
+
+    function goBottom() {
+      setTimeout(function() {
+        $("#chat")
+          .scrollTop($("#chat")[0].scrollHeight);
+      }, 10);
     }
   }
 })();
@@ -31030,7 +31030,7 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
  * AngularJS file upload directives and services. Supoorts: file upload/drop/paste, resume, cancel/abort,
  * progress, resize, thumbnail, preview, validation and CORS
  * @author  Danial  <danial.farid@gmail.com>
- * @version 11.0.0
+ * @version 11.0.2
  */
 
 if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
@@ -31051,7 +31051,7 @@ if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
 
 var ngFileUpload = angular.module('ngFileUpload', []);
 
-ngFileUpload.version = '11.0.0';
+ngFileUpload.version = '11.0.2';
 
 ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
   var upload = this;
@@ -32279,14 +32279,14 @@ ngFileUpload.service('UploadValidate', ['UploadDataUrl', '$q', '$timeout', funct
             defer.resolve();
             return;
           }
-          if (addDimensions) {
+          if (addDimensions && attrGetter(dName) != null) {
             upload.imageDimensions(file).then(function (d) {
               resolveResult(defer, file,
                 attrGetter(dName, {$file: file, $width: d.width, $height: d.height}));
             }, function () {
               defer.reject();
             });
-          } else if (addDuration) {
+          } else if (addDuration && attrGetter(dName) != null) {
             upload.mediaDuration(file).then(function (d) {
               resolveResult(defer, file,
                 attrGetter(dName, {$file: file, $duration: d}));
@@ -32294,7 +32294,10 @@ ngFileUpload.service('UploadValidate', ['UploadDataUrl', '$q', '$timeout', funct
               defer.reject();
             });
           } else {
-            var val = attrGetter(dName, {$file: file}) || validatorVal(attrGetter('ngfValidate', {'$file': file}) || {});
+            var val = attrGetter(dName, {$file: file});
+            if (val == null && validatorVal != null) {
+              val = validatorVal(attrGetter('ngfValidate', {'$file': file}) || {});
+            }
             resolveResult(defer, file, val);
           }
         });
@@ -33386,7 +33389,7 @@ ngFileUpload.service('UploadExif', ['UploadResize', '$q', function (UploadResize
  * progress, resize, thumbnail, preview, validation and CORS
  * FileAPI Flash shim for old browsers not supporting FormData
  * @author  Danial  <danial.farid@gmail.com>
- * @version 11.0.0
+ * @version 11.0.2
  */
 
 (function () {
@@ -33677,7 +33680,7 @@ ngFileUpload.service('UploadExif', ['UploadResize', '$q', function (UploadResize
       }
 
       if (FileAPI.staticPath == null) FileAPI.staticPath = basePath;
-      script.setAttribute('src', jsUrl || basePath + 'FileAPI.js');
+      script.setAttribute('src', jsUrl || basePath + 'FileAPI.min.js');
       document.getElementsByTagName('head')[0].appendChild(script);
     }
 
