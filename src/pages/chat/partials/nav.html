@@ -14,12 +14,12 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse no-margin" aria-expanded="false">
             <ul class="nav navbar-nav navbar-right">
-                <li style="display:none">
+                <li>
                     <div class="navbar-form" role="search">
                         <div class="input-group">
-                            <input id="sala_red" type="text" maxlength="20" class="form-control" placeholder="Crear sala">
+                            <input id="sala_red" type="text" maxlength="20" class="form-control" placeholder="Nombre">
                             <span class="input-group-btn">
-                            <button type="submit" onclick="redirectSala();" class="btn btn-default active">Crear</button>
+                            <button type="submit" onclick="window.location.replace('#/' + $('#sala_red').val())" class="btn btn-default active">Ir / Crear sala</button>
                         </span>
                         </div>
                     </div>

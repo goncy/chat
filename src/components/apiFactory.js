@@ -9,9 +9,11 @@
   function apiFactory($http) {
     var api = this;
 
-    api.logged = false;
-    api.partner = false;
-    api.password = "";
+    api.data = {
+      logged: false,
+      partner: false,
+      password: ""
+    }
 
     api.hasPassword = hasPassword;
     api.login = login;
@@ -19,6 +21,7 @@
     api.getPassword = getPassword;
     api.setPartner = setPartner;
     api.getPartner = getPartner;
+    api.reset = reset;
 
     function hasPassword(sala) {
       return $http.post('server/login.php', {
@@ -36,19 +39,27 @@
     }
 
     function setPassword(status){
-      api.password = status;
+      api.data.password = status;
     }
 
     function getPassword(){
-      return api.password;
+      return api.data.password;
     }
 
     function setPartner(status){
-      api.partner = status;
+      api.data.partner = status;
     }
 
     function getPartner(){
-      return api.partner;
+      return api.data.partner;
+    }
+
+    function reset(){
+      api.data = {
+        logged: false,
+        partner: false,
+        password: ""
+      }
     }
 
     return api;

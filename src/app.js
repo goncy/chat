@@ -3,7 +3,10 @@
 
   var modules = [
     'ngRoute','ngSanitize','pusher-angular','ngFileUpload',
-    'ChatApp.login','ChatApp.chat', 'ChatApp.api'
+    'ChatApp.login',
+    'ChatApp.chat',
+      'ChatApp.chat.directives',
+    'ChatApp.api'
   ];
 
   angular.module('ChatApp', modules)

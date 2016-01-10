@@ -4,29 +4,14 @@
   //Module
   angular.module('ChatApp.chat', [])
 
-    .directive('chatNav', chatNav)
-    .directive('chatModals', chatModals)
-
     .controller('chatController', chatController);
 
   chatController.$inject = ['$scope', '$timeout', '$pusher', 'Upload', '$routeParams', 'apiFactory'];
 
-  //Directives
-  function chatNav() {
-    return {
-      templateUrl: 'pages/chat/partials/nav.html'
-    };
-  }
-
-  function chatModals() {
-    return {
-      templateUrl: 'pages/chat/partials/modals.html'
-    };
-  }
-
   function chatController($scope, $timeout, $pusher, Upload, $routeParams, apiFactory) {
     var chatCtrl = this;
 
+    //Functions
     chatCtrl.sendMessage = sendMessage;
     chatCtrl.uploadFiles = uploadFiles;
     chatCtrl.previewImage = previewImage;
@@ -38,16 +23,20 @@
     //Scope
     chatCtrl.user = {
       name: "Anonimo",
-      uid: ""
+      uid: "",
+      me: {}
     }
 
+    //Partner
     chatCtrl.partner = false;
 
+    //Notificaciones
     chatCtrl.config = {
       conexNotif: true,
       svNotif: true
     }
 
+    //Users array
     chatCtrl.users = [];
 
     //Chat content
@@ -81,6 +70,11 @@
       //Partner
       chatCtrl.partner = apiFactory.getPartner() === "true" ? true : false;
 
+      $scope.$on('$destroy', function() {
+          apiFactory.reset();
+          chatCtrl.pusher.disconnect();
+      });
+
       //Bind events
       bindEvents();
     }
@@ -93,6 +87,7 @@
 
         //Sub completed
         chatCtrl.channel.bind('pusher:subscription_succeeded', function(members) {
+          chatCtrl.user.me = members.me;
           chatCtrl.messages.push({
             "name": "server",
             "msg": "Bienvenido al chat de "+ strong(chatCtrl.slug) +", hay " + strong(members.count) + " personas en la sala",
@@ -171,7 +166,6 @@
     }
 
     function addMessage(data) {
-      console.log(data);
       chatCtrl.messages.push({
         src: data.src || "other",
         name: data.name,
@@ -192,6 +186,8 @@
         return;
       }
       if (file) {
+        $('#photo_unavailable').show();
+        $('#photo_available').hide();
         file.upload = Upload.upload({
           url: 'server/uploadFile.php',
           file: file,
@@ -215,11 +211,16 @@
               msg: response.data.path
             });
 
+            $('#photo_unavailable').hide();
+            $('#photo_available').show();
+
             goBottom();
           });
         }, function(response) {
           if (response.status > 0)
             $scope.errorMsg = response.status + ': ' + response.data;
+            $('#photo_unavailable').hide();
+            $('#photo_available').show();
         }, function(evt) {
           file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
         });

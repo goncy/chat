@@ -2,8 +2,8 @@
   include('vendor/imageManager/imageManager.php');
 
   $devolucion = [];
-  $filename = substr(str_shuffle(MD5(microtime())), 0, 15);
-  $fileext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+  $filename = strtolower(substr(str_shuffle(MD5(microtime())), 0, 15));
+  $fileext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
 
   $handle = new Upload($_FILES['file'], 'es_ES');
 
@@ -13,7 +13,7 @@
     $handle->allowed = array('image/*','video/*');
     $handle->Process('../uploads/');
     if ($handle->processed) {
-      $devolucion['path'] = 'uploads/'.$filename.".".$fileext;
+      $devolucion['path'] = 'uploads/'.$filename.".".strtolower($fileext);
     }else{
       $devolucion['error'] = "Error: " . $handle->error;
     }
