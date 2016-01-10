@@ -37,6 +37,13 @@
             <h5 class="media-heading" style="font-weight: bold">{{msg.name}}: </h5>{{msg.msg}}
           </div>
         </div>
+
+        <!-- Admin -->
+        <div ng-if="msg.src === 'admin'" class="media admin">
+          <div class="media-body">
+            <h5 class="media-heading" style="font-weight: bold">{{msg.name}}: </h5>{{msg.msg}}
+          </div>
+        </div>
       </div>
     </div>
 

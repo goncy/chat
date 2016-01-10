@@ -100,7 +100,7 @@ a:link {
   box-shadow: 1px 1px 3px -1px rgba(0,0,0,0.50);
 }
 
-.owner{
+.admin{
   background: rgba(201,146,49,1);
   color: #fff;
   -webkit-box-shadow: 1px 1px 3px -1px rgba(0,0,0,0.50);

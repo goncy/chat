@@ -32,7 +32,6 @@
     function login() {
       apiFactory.login($routeParams.sala.toLowerCase(), $scope.password)
         .then(function(res) {
-          console.log(res.data);
           if (res.data.status === "true") {
             apiFactory.setPassword($scope.password);
             apiFactory.setPartner(res.data.partner);

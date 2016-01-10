@@ -36,7 +36,8 @@
 
   	while ($stmt-> fetch()) {
   		if($col1 == $password || empty($col1) || $col2 < 1){
-        echo $pusher->presence_auth($_POST['channel_name'], $_POST['socket_id'], $_POST['sala']."-".$_POST['socket_id'], "");
+        $data = array('admin' => $_POST['admin']);
+        echo $pusher->presence_auth($_POST['channel_name'], $_POST['socket_id'], $_POST['sala']."-".$_POST['socket_id'], $data);
   		}else{
         echo "false";
   		}

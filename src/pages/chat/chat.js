@@ -24,7 +24,8 @@
     chatCtrl.user = {
       name: "Anonimo",
       uid: "",
-      me: {}
+      me: {},
+      admin: false
     }
 
     //Partner
@@ -45,6 +46,11 @@
     iniciar();
 
     function iniciar() {
+      //Chat name
+      chatCtrl.name = $routeParams.sala.toUpperCase();
+      chatCtrl.slug = $routeParams.sala.toLowerCase();
+      chatCtrl.user.admin = localStorage.getItem("admin") === chatCtrl.slug ? true : false;
+
       //Init
       chatCtrl.pusher = $pusher(new Pusher('1af1d4c26abef175083a', {
         encrypted: true,
@@ -55,14 +61,11 @@
           },
           params: {
             'sala': $routeParams.sala,
-            'password': apiFactory.getPassword()
+            'password': apiFactory.getPassword(),
+            'admin': chatCtrl.user.admin
           }
         }
       }));
-
-      //Chat name
-      chatCtrl.name = $routeParams.sala.toUpperCase();
-      chatCtrl.slug = $routeParams.sala.toLowerCase();
 
       //Channel
       chatCtrl.channel = chatCtrl.pusher.subscribe('presence-' + chatCtrl.slug);
@@ -134,7 +137,7 @@
         });
 
         //Mensaje nuevo de servidor
-        chatCtrl.channel.bind('new_sv_msg', function(data) {
+        chatCtrl.channel.bind('server-new_msg', function(data) {
           if (chatCtrl.config.svNotif) addMessage(data)
         });
 
@@ -152,11 +155,13 @@
         uid: chatCtrl.user.uid,
         msg: $scope.msg,
         name: chatCtrl.user.name,
+        admin: chatCtrl.user.admin
       }
 
       chatCtrl.channel.trigger('client-new_msg', data);
+
       chatCtrl.messages.push({
-        src: "self",
+        src: chatCtrl.user.admin ? "admin" : "self",
         name: "Yo",
         msg: $scope.msg
       });
@@ -166,8 +171,9 @@
     }
 
     function addMessage(data) {
+      data.src = data.src || "other";
       chatCtrl.messages.push({
-        src: data.src || "other",
+        src: data.admin ? "admin" : data.src,
         name: data.name,
         msg: data.msg
       });
