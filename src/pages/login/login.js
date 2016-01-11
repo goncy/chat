@@ -1,7 +1,7 @@
-(function() {
+(function () {
   'use strict';
 
-  angular.module('ChatApp.login', [])
+  window.angular.module('ChatApp.login', [])
     .controller('loginController', loginController);
 
   loginController.$inject = ["$scope", "$location", "$routeParams", "apiFactory"];
@@ -21,7 +21,7 @@
 
     function hasPassword() {
       apiFactory.hasPassword($routeParams.sala.toLowerCase())
-        .then(function(res) {
+        .then(function (res) {
           if (res.data.status === "false") {
             $location.path('/' + $routeParams.sala.toLowerCase() + '/chat');
           }
@@ -31,7 +31,7 @@
 
     function login() {
       apiFactory.login($routeParams.sala.toLowerCase(), $scope.password)
-        .then(function(res) {
+        .then(function (res) {
           if (res.data.status === "true") {
             apiFactory.setPassword($scope.password);
             apiFactory.setPartner(res.data.partner);
@@ -39,7 +39,7 @@
           } else {
             alert("Error, la password no es correcta o hubo un error con el servidor");
           }
-        }, function(err) {
+        }, function (err) {
           alert("Error, la password no es correcta o hubo un error con el servidor");
         });
     }

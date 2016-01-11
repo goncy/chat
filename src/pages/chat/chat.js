@@ -1,10 +1,10 @@
-(function() {
+(function () {
   'use strict';
 
   //Module
   angular.module('ChatApp.chat', [])
 
-    .controller('chatController', chatController);
+  .controller('chatController', chatController);
 
   chatController.$inject = ['$scope', '$timeout', '$pusher', 'Upload', '$routeParams', 'apiFactory'];
 
@@ -26,7 +26,7 @@
       uid: "",
       me: {},
       admin: false
-    }
+    };
 
     //Partner
     chatCtrl.partner = false;
@@ -35,7 +35,7 @@
     chatCtrl.config = {
       conexNotif: true,
       svNotif: true
-    }
+    };
 
     //Users array
     chatCtrl.users = [];
@@ -73,9 +73,9 @@
       //Partner
       chatCtrl.partner = apiFactory.getPartner() === "true" ? true : false;
 
-      $scope.$on('$destroy', function() {
-          apiFactory.reset();
-          chatCtrl.pusher.disconnect();
+      $scope.$on('$destroy', function () {
+        apiFactory.reset();
+        chatCtrl.pusher.disconnect();
       });
 
       //Bind events
@@ -83,24 +83,24 @@
     }
 
     function bindEvents() {
-      chatCtrl.pusher.connection.bind('connected', function() {
+      chatCtrl.pusher.connection.bind('connected', function () {
 
         chatCtrl.user.uid = chatCtrl.pusher.connection.socket_id;
         chatCtrl.user.name = "Anonimo";
 
         //Sub completed
-        chatCtrl.channel.bind('pusher:subscription_succeeded', function(members) {
+        chatCtrl.channel.bind('pusher:subscription_succeeded', function (members) {
           chatCtrl.user.me = members.me;
           chatCtrl.messages.push({
             "name": "server",
-            "msg": "Bienvenido al chat de "+ strong(chatCtrl.slug) +", hay " + strong(members.count) + " personas en la sala",
+            "msg": "Bienvenido al chat de " + strong(chatCtrl.slug) + ", hay " + strong(members.count) + " personas en la sala",
             "src": "server"
           });
           goBottom();
         });
 
         //Sub completed
-        chatCtrl.channel.bind('pusher:subscription_error', function(members) {
+        chatCtrl.channel.bind('pusher:subscription_error', function (members) {
           $('#alertError')
             .text("Hubo un error al unirse a la sala, posiblemente la contraseña sea incorrecta");
           $('#alertModal')
@@ -115,7 +115,7 @@
         });
 
         //Se unio alguien
-        chatCtrl.channel.bind('pusher:member_added', function(member) {
+        chatCtrl.channel.bind('pusher:member_added', function (member) {
           chatCtrl.users.push(member);
           if (chatCtrl.config.conexNotif) chatCtrl.messages.push({
             "name": "server",
@@ -126,7 +126,7 @@
         });
 
         //Se fue alguien
-        chatCtrl.channel.bind('pusher:member_removed', function(member) {
+        chatCtrl.channel.bind('pusher:member_removed', function (member) {
           chatCtrl.users.splice(chatCtrl.users.indexOf(member), 1);
           if (chatCtrl.config.conexNotif) chatCtrl.messages.push({
             "name": "server",
@@ -137,12 +137,12 @@
         });
 
         //Mensaje nuevo de servidor
-        chatCtrl.channel.bind('server-new_msg', function(data) {
+        chatCtrl.channel.bind('server-new_msg', function (data) {
           if (chatCtrl.config.svNotif) addMessage(data)
         });
 
         //Mensaje nuevo de cliente
-        chatCtrl.channel.bind('client-new_msg', function(data) {
+        chatCtrl.channel.bind('client-new_msg', function (data) {
           addMessage(data)
         });
 
@@ -199,8 +199,8 @@
           file: file,
           sendFieldsAs: 'form'
         });
-        file.upload.then(function(response) {
-          $timeout(function() {
+        file.upload.then(function (response) {
+          $timeout(function () {
             file.result = response.data;
 
             var data = {
@@ -222,12 +222,12 @@
 
             goBottom();
           });
-        }, function(response) {
+        }, function (response) {
           if (response.status > 0)
             $scope.errorMsg = response.status + ': ' + response.data;
-            $('#photo_unavailable').hide();
-            $('#photo_available').show();
-        }, function(evt) {
+          $('#photo_unavailable').hide();
+          $('#photo_available').show();
+        }, function (evt) {
           file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
         });
       }
@@ -249,7 +249,7 @@
     }
 
     function goBottom() {
-      setTimeout(function() {
+      setTimeout(function () {
         $("#chat")
           .scrollTop($("#chat")[0].scrollHeight);
       }, 10);
