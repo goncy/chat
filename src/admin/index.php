@@ -16,8 +16,6 @@ if($action === "changePass"){
     $message = "La sala no es valida.";
   }elseif(strlen( $_POST['passSala']) > 20){
     $message = "El largo del password no es valido.";
-  }elseif (ctype_alnum($_POST['passSala']) != true){
-    $message = "La contraseña debe ser alphanumerica";
   }elseif (ctype_alnum($_POST['nameSala']) != true){
     $message = "La sala debe ser alphanumerica";
   }else{
@@ -44,7 +42,7 @@ if($action === "changePass"){
       }
     }else{
       $message = "Se encontraron errores en los datos, intente nuevamente";
-    }     
+    }
   }
 }elseif($action === "login"){
   if(!isset( $_POST['nameSala'], $_POST['passAdmin'])){
@@ -72,7 +70,7 @@ if($action === "changePass"){
       $stmt->close();
     }else{
       $message = "Se encontraron errores en los datos, intente nuevamente";
-    }     
+    }
   }
 }
 ?>

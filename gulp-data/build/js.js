@@ -14,13 +14,14 @@ var
   es = require('event-stream');
 
 gulp.task('build:js', function () {
-  var jsFilter = filter('**/*.js');
-  var vendorFiles = gulp.src('./bower.json')
+  var jsFilter = filter('**/*.js'),
+
+  vendorFiles = gulp.src('./bower.json')
     .pipe(mainBowerFiles())
     .pipe(jsFilter)
-    .pipe(concat('vendor.js'));
+    .pipe(concat('vendor.js')),
 
-  var appFiles = gulp.src(['./src/pages/**/*.{js,coffee}', './src/app.js', './src/components/**/*.{js,coffee}'])
+  appFiles = gulp.src(['./src/pages/**/*.{js,coffee}', './src/app.js', './src/components/**/*.{js,coffee}'])
     .pipe(angularFileSort())
     .pipe(concat('app.js'));
 

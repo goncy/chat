@@ -10,7 +10,9 @@
   if ($handle->uploaded) {
     $handle->file_new_name_body = $filename;
     $handle->file_safe_name = true;
+    $handle->file_max_size = '31457280';
     $handle->allowed = array('image/*','video/*');
+    $devolucion['tipo'] = $handle->file_src_mime;
     $handle->Process('../uploads/');
     if ($handle->processed) {
       $devolucion['path'] = 'uploads/'.$filename.".".strtolower($fileext);

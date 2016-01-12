@@ -138,12 +138,12 @@
 
         //Mensaje nuevo de servidor
         chatCtrl.channel.bind('server-new_msg', function (data) {
-          if (chatCtrl.config.svNotif) addMessage(data)
+          if (chatCtrl.config.svNotif) addMessage(data);
         });
 
         //Mensaje nuevo de cliente
         chatCtrl.channel.bind('client-new_msg', function (data) {
-          addMessage(data)
+          addMessage(data);
         });
 
       });
@@ -151,23 +151,26 @@
 
     //Messages functions
     function sendMessage() {
-      var data = {
-        uid: chatCtrl.user.uid,
-        msg: $scope.msg,
-        name: chatCtrl.user.name,
-        admin: chatCtrl.user.admin
+      if ($scope.msg) {
+        var data = {
+          uid: chatCtrl.user.uid,
+          msg: $scope.msg,
+          name: chatCtrl.user.name,
+          admin: chatCtrl.user.admin
+        };
+
+        chatCtrl.channel.trigger('client-new_msg', data);
+
+        chatCtrl.messages.push({
+          src: chatCtrl.user.admin ? "admin" : "self",
+          name: "Yo",
+          msg: $scope.msg
+        });
+
+        $scope.msg = "";
+
+        goBottom();
       }
-
-      chatCtrl.channel.trigger('client-new_msg', data);
-
-      chatCtrl.messages.push({
-        src: chatCtrl.user.admin ? "admin" : "self",
-        name: "Yo",
-        msg: $scope.msg
-      });
-      $scope.msg = "";
-
-      goBottom();
     }
 
     function addMessage(data) {
@@ -186,7 +189,7 @@
       $scope.errFile = errFiles && errFiles[0];
       if ($scope.errFile) {
         $('#alertError')
-          .text("Hubo un error al enviar el archivo, asegurate de que sea una foto o video y que pese menos de 10MB");
+          .text("Hubo un error al enviar el archivo, asegurate de que sea una foto o video y que pese menos de 30MB");
         $('#alertModal')
           .modal('show');
         return;
@@ -203,16 +206,18 @@
           $timeout(function () {
             file.result = response.data;
 
+            var fileType = getFileExt(response.data.tipo);
+
             var data = {
               uid: chatCtrl.user.uid,
-              src: "image",
+              src: fileType,
               msg: response.data.path,
-              name: chatCtrl.user.name,
-            }
+              name: chatCtrl.user.name
+            };
 
             chatCtrl.channel.trigger('client-new_msg', data);
             chatCtrl.messages.push({
-              src: "image",
+              src: fileType,
               name: "Yo",
               msg: response.data.path
             });
@@ -253,6 +258,12 @@
         $("#chat")
           .scrollTop($("#chat")[0].scrollHeight);
       }, 10);
+    }
+
+    function getFileExt(mime){
+      if(mime.match(/video\/.*/g)) return "video";
+      if(mime.match(/image\/.*/g)) return "image";
+      else return "unknown";
     }
   }
 })();
