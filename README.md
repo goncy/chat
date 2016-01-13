@@ -18,6 +18,5 @@ Tecnologias usadas: Angular.js, PHP, librerias para ambos lenguajes, comunicacio
 
 # Falta
 
-* Sonido de notificacion.
 * Div para envio de video.
 * Cambiar Button a Div para manejar bien los distintos tipos de archivos.

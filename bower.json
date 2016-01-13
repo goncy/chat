@@ -21,6 +21,12 @@
     "fancyBox": "~2.1.5",
     "PACE": "pace#~1.0.2",
     "bootstrap": "~3.3.6",
-    "angular-sanitize": "~1.4.8"
+    "angular-sanitize": "~1.4.8",
+    "angular-toasty": "~1.0.4"
+  },
+  "overrides": {
+    "fancyBox": {
+        "main": "source/jquery.fancybox.js"
+    }
   }
 }

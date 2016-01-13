@@ -10,7 +10,7 @@ gulp.task('copy:server', function() {
     var uploads = gulp.src('./src/uploads/')
         .pipe(gulp.dest('./dist'));
 
-    var uploads = gulp.src('./src/admin/**')
+    var admin = gulp.src('./src/admin/**')
     	.pipe(gulpif(argv.env === "prod" || argv.env === "stg", htmlmin({collapseWhitespace: true})))
         .pipe(gulp.dest('./dist/admin'));
 });

@@ -6,9 +6,9 @@
 
   .controller('chatController', chatController);
 
-  chatController.$inject = ['$scope', '$timeout', '$pusher', 'Upload', '$routeParams', 'apiFactory'];
+  chatController.$inject = ['$scope', '$timeout', '$pusher', 'Upload', '$routeParams', 'apiFactory', 'toasty'];
 
-  function chatController($scope, $timeout, $pusher, Upload, $routeParams, apiFactory) {
+  function chatController($scope, $timeout, $pusher, Upload, $routeParams, apiFactory, toasty) {
     var chatCtrl = this;
 
     //Functions
@@ -169,7 +169,7 @@
 
         $scope.msg = "";
 
-        goBottom();
+        goBottom(true);
       }
     }
 
@@ -180,7 +180,7 @@
         name: data.name,
         msg: data.msg
       });
-      goBottom();
+      goBottom(true);
     }
 
     //Image
@@ -188,13 +188,11 @@
       $scope.f = file;
       $scope.errFile = errFiles && errFiles[0];
       if ($scope.errFile) {
-        $('#alertError')
-          .text("Hubo un error al enviar el archivo, asegurate de que sea una foto o video y que pese menos de 30MB");
-        $('#alertModal')
-          .modal('show');
+        toasty.error("Hubo un error al enviar el archivo, asegurate de que sea una foto o video y que pese menos de 30MB");
         return;
       }
       if (file) {
+        toasty.wait("Subiendo archivo");
         $('#photo_unavailable').show();
         $('#photo_available').hide();
         file.upload = Upload.upload({
@@ -225,11 +223,11 @@
             $('#photo_unavailable').hide();
             $('#photo_available').show();
 
-            goBottom();
+            goBottom(true);
           });
         }, function (response) {
           if (response.status > 0)
-            $scope.errorMsg = response.status + ': ' + response.data;
+            toasty.error(response.status + ': ' + response.data);
           $('#photo_unavailable').hide();
           $('#photo_available').show();
         }, function (evt) {
@@ -253,16 +251,18 @@
       return "<strong>" + txt + "</strong>";
     }
 
-    function goBottom() {
+    function goBottom(sound) {
       setTimeout(function () {
         $("#chat")
           .scrollTop($("#chat")[0].scrollHeight);
       }, 10);
+
+      if (sound) toasty('Notificacion');
     }
 
-    function getFileExt(mime){
-      if(mime.match(/video\/.*/g)) return "video";
-      if(mime.match(/image\/.*/g)) return "image";
+    function getFileExt(mime) {
+      if (mime.match(/video\/.*/g)) return "video";
+      if (mime.match(/image\/.*/g)) return "image";
       else return "unknown";
     }
   }

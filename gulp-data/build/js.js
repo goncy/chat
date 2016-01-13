@@ -10,6 +10,7 @@ var
   livereload = require('gulp-livereload'),
   filter = require('gulp-filter'),
   debug = require('gulp-debug'),
+  sourcemaps = require('gulp-sourcemaps'),
   order = require('gulp-order'),
   es = require('event-stream');
 
@@ -23,7 +24,9 @@ gulp.task('build:js', function () {
 
   appFiles = gulp.src(['./src/pages/**/*.{js,coffee}', './src/app.js', './src/components/**/*.{js,coffee}'])
     .pipe(angularFileSort())
-    .pipe(concat('app.js'));
+    .pipe(sourcemaps.init())
+    .pipe(concat('app.js'))
+    .pipe(sourcemaps.write());
 
   return es.concat(vendorFiles, appFiles)
     .pipe(order([

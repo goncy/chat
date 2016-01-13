@@ -2,7 +2,7 @@
   'use strict';
 
   var modules = [
-    'ngRoute','ngSanitize','pusher-angular','ngFileUpload',
+    'ngRoute','ngSanitize','pusher-angular','ngFileUpload', 'angular-toasty',
     'ChatApp.login',
     'ChatApp.chat',
       'ChatApp.chat.directives',
@@ -12,9 +12,27 @@
   angular.module('ChatApp', modules)
     .config(ChatAppConfig);
 
-  ChatAppConfig.$inject = ['$routeProvider'];
+  ChatAppConfig.$inject = ['$routeProvider', 'toastyConfigProvider'];
 
-  function ChatAppConfig($routeProvider) {
+  function ChatAppConfig($routeProvider, toastyConfigProvider){
+    routes($routeProvider);
+    toasty(toastyConfigProvider);
+  }
+
+  function toasty (toastyConfigProvider) {
+    toastyConfigProvider.setConfig({
+        sound: true,
+        shake: false,
+        position: 'top-right',
+        limit: 1,
+        timeout: 7000,
+        showClose: true,
+        clickToClose: true,
+        class: 'hola'
+    });
+  }
+
+  function routes($routeProvider){
     //Chat
     $routeProvider.when('/:sala/chat', {
       templateUrl: 'pages/chat/chat.html',
