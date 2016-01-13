@@ -6,7 +6,6 @@ var
   gulpif     = require('gulp-if'),
   argv       = require('yargs').default('env', 'local').argv,
   livereload = require('gulp-livereload'),
-  sourcemaps = require('gulp-sourcemaps'),
   es         = require('event-stream');
 
 var vendorFilesCss = [

@@ -192,7 +192,7 @@
         return;
       }
       if (file) {
-        toasty.wait("Subiendo archivo");
+        toasty.wait({msg:"Subiendo archivo", sound:false});
         $('#photo_unavailable').show();
         $('#photo_available').hide();
         file.upload = Upload.upload({

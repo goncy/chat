@@ -4,7 +4,7 @@ var gulp = require('gulp'),
     imagemin = require('gulp-imagemin');
 
 gulp.task('copy:img', function() {
-    return gulp.src(['./src/assets/img/**', './src/favicon.ico'])
+    var images = gulp.src(['./src/favicon.ico','!./src/assets/img/fancybox','./src/assets/img/*'])
         .pipe(gulpif(argv.env === "prod" || argv.env === "stg", imagemin({
             progressive: true,
             svgoPlugins: [{
@@ -12,4 +12,13 @@ gulp.task('copy:img', function() {
             }]
         })))
         .pipe(gulp.dest('./dist/img/'));
+
+    var fancybox = gulp.src(['./src/assets/img/fancybox/**'])
+        .pipe(gulpif(argv.env === "prod" || argv.env === "stg", imagemin({
+            progressive: true,
+            svgoPlugins: [{
+                removeViewBox: false
+            }]
+        })))
+        .pipe(gulp.dest('./dist/css/'));
 });
