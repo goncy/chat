@@ -217,6 +217,7 @@ a:link {
 
 #toasty{
   display: block;
+  margin-top: 60px;
 }
 
 .toasty-type-default{

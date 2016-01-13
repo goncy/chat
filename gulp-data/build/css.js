@@ -2,7 +2,7 @@ var
   gulp       = require('gulp'),
   sass       = require('gulp-sass'),
   concat     = require('gulp-concat'),
-  minifyCss  = require('gulp-cssnano'),
+  nano       = require('gulp-cssnano'),
   gulpif     = require('gulp-if'),
   argv       = require('yargs').default('env', 'local').argv,
   livereload = require('gulp-livereload'),
@@ -22,7 +22,7 @@ gulp.task('build:css', function () {
     )
     .pipe(sass())
     .pipe(concat('chat.css'))
-    .pipe(gulpif(argv.env === "prod" || argv.env === "stg", minifyCss()))
+    .pipe(gulpif(argv.env === "prod" || argv.env === "stg", nano()))
     .pipe(gulp.dest('./dist/css/'))
     .pipe(livereload());
 });
