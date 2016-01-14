@@ -13,7 +13,7 @@
       logged: false,
       partner: false,
       password: ""
-    }
+    };
 
     api.hasPassword = hasPassword;
     api.login = login;

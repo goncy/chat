@@ -13,6 +13,10 @@
 
   function configModal() {
     return {
-      templateUrl: 'pages/chat/partials/configModal.html'
+      templateUrl: 'pages/chat/partials/configModal.html',
+      scope: {
+        config: '=',
+        username: '='
+      }
     };
   }
