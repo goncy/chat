@@ -30,21 +30,21 @@
         <!-- Self -->
         <div ng-if="msg.src === 'self'" class="media self">
           <div class="media-body">
-            <h5 class="media-heading" style="font-weight: bold">Yo: </h5>{{msg.msg}}
+            <h5 class="media-heading name" style="font-weight: bold"><span ng-style="{'color': msg.color}">Yo</span></h5>{{msg.msg}}
           </div>
         </div>
 
         <!-- Other -->
         <div ng-if="msg.src === 'other'" class="media other">
           <div class="media-body">
-            <h5 class="media-heading name" style="font-weight: bold">{{msg.name}}: </h5>{{msg.msg}}
+            <h5 class="media-heading name" style="font-weight: bold"><span ng-style="{'color': msg.color}">{{msg.name}}</span></h5>{{msg.msg}}
           </div>
         </div>
 
         <!-- Admin -->
         <div ng-if="msg.src === 'admin'" class="media admin">
           <div class="media-body">
-            <h5 class="media-heading" style="font-weight: bold">{{msg.name}}: </h5>{{msg.msg}}
+            <h5 class="media-heading" style="font-weight: bold">{{msg.name}}</h5>{{msg.msg}}
           </div>
         </div>
       </div>
@@ -58,14 +58,18 @@
           <button class="btn btn-default" data-toggle="modal" data-target="#configModal" type="button">
             <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
           </button>
-          <button id="prv_kick" style="display:none;" class="btn btn-danger" alt="Expulsar persona" onclick="kickPrv()" type="button">
+          <!-- Kick -->
+          <button ng-show="chatCtrl.prv.id" class="btn btn-danger" alt="Expulsar persona" type="button">
             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+          </button>
+          <button ng-show="chatCtrl.prv.id" class="btn btn-primary" alt="Cancelar mensaje privado" type="button">
+            <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
           </button>
         </span>
         <!-- Mensaje -->
         <input ng-keyup="$event.keyCode == 13 && chatCtrl.sendMessage()" id="msg_input" type="text" maxlength="500" ng-model="msg" class="form-control" placeholder="Mensaje">
-        <input id="prv_name" type="text" hidden>
-        <input id="prv_id" type="text" hidden>
+        <input ng-model="chatCtrl.prv.name" type="text" hidden>
+        <input ng-model="chatCtrl.prv.id" type="text" hidden>
         <span class="input-group-btn">
           <!-- Foto -->
           <input id="imagefile" type="file" style="display:none;" ngf-select="chatCtrl.uploadFiles($file, $invalidFiles)" accept="image/*,video/*" ngf-max-size="30MB" />
@@ -83,4 +87,4 @@
   </div>
 </div>
 
-<div config-modal config="chatCtrl.config" username="chatCtrl.user.name"></div>
+<div config-modal config="chatCtrl.config" user="chatCtrl.user"></div>

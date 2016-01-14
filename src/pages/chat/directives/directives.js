@@ -16,7 +16,7 @@
       templateUrl: 'pages/chat/partials/configModal.html',
       scope: {
         config: '=',
-        username: '='
+        user: '='
       }
     };
   }

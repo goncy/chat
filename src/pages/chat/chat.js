@@ -17,16 +17,24 @@
     chatCtrl.previewImage = previewImage;
 
     //Pusher cfg
-    chatCtrl.pusher = [];
-    chatCtrl.channel = [];
+    chatCtrl.server = {
+      pusher: [],
+      channel: []
+    };
 
     //Scope
     chatCtrl.user = {
       name: "Anonimo",
+      color: getRandomColor(),
       uid: "",
-      me: {},
+      data: {},
       admin: false,
       uploading: false
+    };
+
+    chatCtrl.prv = {
+      name: "",
+      id: ""
     };
 
     //Partner
@@ -54,7 +62,7 @@
       chatCtrl.user.admin = localStorage.getItem("admin") === chatCtrl.slug ? true : false;
 
       //Init
-      chatCtrl.pusher = $pusher(new Pusher('1af1d4c26abef175083a', {
+      chatCtrl.server.pusher = $pusher(new Pusher('1af1d4c26abef175083a', {
         encrypted: true,
         authEndpoint: 'server/auth.php',
         auth: {
@@ -70,14 +78,14 @@
       }));
 
       //Channel
-      chatCtrl.channel = chatCtrl.pusher.subscribe('presence-' + chatCtrl.slug);
+      chatCtrl.server.channel = chatCtrl.server.pusher.subscribe('presence-' + chatCtrl.slug);
 
       //Partner
       chatCtrl.partner = apiFactory.getPartner() === "true" ? true : false;
 
       $scope.$on('$destroy', function () {
         apiFactory.reset();
-        chatCtrl.pusher.disconnect();
+        chatCtrl.server.pusher.disconnect();
       });
 
       //Bind events
@@ -85,14 +93,14 @@
     }
 
     function bindEvents() {
-      chatCtrl.pusher.connection.bind('connected', function () {
+      chatCtrl.server.pusher.connection.bind('connected', function () {
 
-        chatCtrl.user.uid = chatCtrl.pusher.connection.socket_id;
+        chatCtrl.user.uid = chatCtrl.server.pusher.connection.socket_id;
         chatCtrl.user.name = "Anonimo";
 
         //Sub completed
-        chatCtrl.channel.bind('pusher:subscription_succeeded', function (members) {
-          chatCtrl.user.me = members.me;
+        chatCtrl.server.channel.bind('pusher:subscription_succeeded', function (members) {
+          chatCtrl.user.data = members.me;
           chatCtrl.messages.push({
             "name": "server",
             "msg": "Bienvenido al chat de " + strong(chatCtrl.slug) + ", hay " + strong(members.count) + " personas en la sala",
@@ -102,7 +110,7 @@
         });
 
         //Sub completed
-        chatCtrl.channel.bind('pusher:subscription_error', function (members) {
+        chatCtrl.server.channel.bind('pusher:subscription_error', function (members) {
           toasty.error("Hubo un error al unirse a la sala, posiblemente la contraseña sea incorrecta");
 
           chatCtrl.messages.push({
@@ -114,7 +122,7 @@
         });
 
         //Se unio alguien
-        chatCtrl.channel.bind('pusher:member_added', function (member) {
+        chatCtrl.server.channel.bind('pusher:member_added', function (member) {
           chatCtrl.users.push(member);
           if (chatCtrl.config.conexNotif) chatCtrl.messages.push({
             "name": "server",
@@ -125,7 +133,7 @@
         });
 
         //Se fue alguien
-        chatCtrl.channel.bind('pusher:member_removed', function (member) {
+        chatCtrl.server.channel.bind('pusher:member_removed', function (member) {
           chatCtrl.users.splice(chatCtrl.users.indexOf(member), 1);
           if (chatCtrl.config.conexNotif) chatCtrl.messages.push({
             "name": "server",
@@ -136,12 +144,12 @@
         });
 
         //Mensaje nuevo de servidor
-        chatCtrl.channel.bind('server-new_msg', function (data) {
+        chatCtrl.server.channel.bind('server-new_msg', function (data) {
           if (chatCtrl.config.svNotif) addMessage(data);
         });
 
         //Mensaje nuevo de cliente
-        chatCtrl.channel.bind('client-new_msg', function (data) {
+        chatCtrl.server.channel.bind('client-new_msg', function (data) {
           addMessage(data);
         });
 
@@ -155,15 +163,17 @@
           uid: chatCtrl.user.uid,
           msg: $scope.msg,
           name: chatCtrl.user.name,
+          color: chatCtrl.user.color,
           admin: chatCtrl.user.admin
         };
 
-        chatCtrl.channel.trigger('client-new_msg', data);
+        chatCtrl.server.channel.trigger('client-new_msg', data);
 
         chatCtrl.messages.push({
           src: chatCtrl.user.admin ? "admin" : "self",
           name: "Yo",
-          msg: $scope.msg
+          msg: $scope.msg,
+          color: chatCtrl.user.color
         });
 
         $scope.msg = "";
@@ -177,7 +187,8 @@
       chatCtrl.messages.push({
         src: data.admin ? "admin" : data.src,
         name: data.name,
-        msg: data.msg
+        msg: data.msg,
+        color: data.color
       });
       goBottom(true);
     }
@@ -208,10 +219,11 @@
               uid: chatCtrl.user.uid,
               src: fileType,
               msg: response.data.path,
-              name: chatCtrl.user.name
+              name: chatCtrl.user.name,
+              color: chatCtrl.user.color
             };
 
-            chatCtrl.channel.trigger('client-new_msg', data);
+            chatCtrl.server.channel.trigger('client-new_msg', data);
             chatCtrl.messages.push({
               src: fileType,
               name: "Yo",
@@ -260,6 +272,15 @@
       if (mime.match(/video\/.*/g)) return "video";
       if (mime.match(/image\/.*/g)) return "image";
       else return "unknown";
+    }
+
+    function getRandomColor() {
+      var letters = '0123456789ABCDEF'.split('');
+      var color = '#';
+      for (var i = 0; i < 6; i++ ) {
+          color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
     }
   }
 })();

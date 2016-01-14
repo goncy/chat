@@ -22,11 +22,12 @@
     "PACE": "pace#~1.0.2",
     "bootstrap": "~3.3.6",
     "angular-sanitize": "~1.4.8",
-    "angular-toasty": "~1.0.4"
+    "angular-toasty": "~1.0.4",
+    "angular-bootstrap-colorpicker": "~3.0.22"
   },
   "overrides": {
     "fancyBox": {
-        "main": "source/jquery.fancybox.js"
+      "main": "source/jquery.fancybox.js"
     }
   }
 }

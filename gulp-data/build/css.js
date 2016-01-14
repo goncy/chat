@@ -11,7 +11,8 @@ var
 var vendorFilesCss = [
   "./src/bower_components/fancyBox/source/jquery.fancybox.css",
   "./src/bower_components/PACE/themes/green/pace-theme-minimal.css",
-  "./src/bower_components/angular-toasty/dist/angular-toasty.css"
+  "./src/bower_components/angular-toasty/dist/angular-toasty.css",
+  "./src/bower_components/angular-bootstrap-colorpicker/css/colorpicker.css"
 ];
 
 gulp.task('build:css', function () {

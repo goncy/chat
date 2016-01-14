@@ -2,7 +2,7 @@
   'use strict';
 
   var modules = [
-    'ngRoute', 'ngSanitize', 'pusher-angular', 'ngFileUpload', 'angular-toasty',
+    'ngRoute', 'ngSanitize', 'pusher-angular', 'ngFileUpload', 'angular-toasty', 'colorpicker.module',
     'ChatApp.login',
     'ChatApp.chat',
       'ChatApp.chat.directives',
