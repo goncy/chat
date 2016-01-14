@@ -1,11 +1,3 @@
-<script>
-  /*// Enable pusher logging - don't include this in production
-  Pusher.log = function(message) {
-    if (window.console && window.console.log) {
-      window.console.log(message);
-    }
-  };*/
-</script>
 <div chat-nav></div>
 <!-- Chat -->
 <div class="container bodycontainer">
@@ -29,7 +21,7 @@
         <!-- Video -->
         <div class="col-xs-12" style="padding:0px">
           <div ng-if="msg.src === 'video'" class="media video col-xs-6 col-sm-4 col-md-3 col-lg-2 clearfix" style="padding:0px;">
-            <a ng-if="msg.src === 'video'" href="{{msg.msg}}">
+            <a ng-if="msg.src === 'video'" target="_blank" href="{{msg.msg}}">
               <button class="media video" style="width:100%;background-color:transparent;height:100%;margin:0px;background-image: url('./img/video.png');"><span class="label label-info">Video de: {{msg.name}}</span></button>
             </a>
           </div>
