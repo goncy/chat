@@ -1,6 +1,6 @@
 <div chat-nav></div>
 <!-- Chat -->
-<div class="container bodycontainer">
+<div class="container" id="main">
   <div class="row">
     <div id="chat" class="col-md-12 chat">
       <div ng-repeat="msg in chatCtrl.messages">
@@ -37,7 +37,7 @@
         <!-- Other -->
         <div ng-if="msg.src === 'other'" class="media other">
           <div class="media-body">
-            <h5 class="media-heading" style="font-weight: bold">{{msg.name}}: </h5>{{msg.msg}}
+            <h5 class="media-heading name" style="font-weight: bold">{{msg.name}}: </h5>{{msg.msg}}
           </div>
         </div>
 
@@ -69,10 +69,10 @@
         <span class="input-group-btn">
           <!-- Foto -->
           <input id="imagefile" type="file" style="display:none;" ngf-select="chatCtrl.uploadFiles($file, $invalidFiles)" accept="image/*,video/*" ngf-max-size="30MB" />
-          <button class="btn btn-info" id="photo_available" onclick="$('#imagefile').click();" type="button">
+          <button class="btn btn-info" ng-hide="chatCtrl.user.uploading" id="photo_available" onclick="$('#imagefile').click();" type="button">
             <span class="glyphicon glyphicon-camera" aria-hidden="true"></span>
           </button>
-          <button class="btn btn-warning disabled" id="photo_unavailable" style="display:none" type="button">
+          <button class="btn btn-warning disabled" ng-show="chatCtrl.user.uploading" id="photo_unavailable" type="button">
             <span class="glyphicon glyphicon-repeat gly-spin" aria-hidden="true"></span>
           </button>
           <!-- Enviar -->
@@ -83,4 +83,4 @@
   </div>
 </div>
 
-<div chat-modals></div>
+<div config-modal></div>

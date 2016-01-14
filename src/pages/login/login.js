@@ -9,7 +9,7 @@
   function loginController($scope, $location, $routeParams, apiFactory) {
     var loginCtrl = this;
 
-    loginCtrl.checkedPass = false;
+    loginCtrl.roomWithPass = false;
 
     loginCtrl.login = login;
 
@@ -24,8 +24,9 @@
         .then(function (res) {
           if (res.data.status === "false") {
             $location.path('/' + $routeParams.sala.toLowerCase() + '/chat');
+          }else{
+            loginCtrl.roomWithPass = true;
           }
-          loginCtrl.checkedPass = true;
         });
     }
 

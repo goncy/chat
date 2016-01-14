@@ -1,0 +1,33 @@
+//Imports
+@import "styles/extras";
+@import "styles/chat";
+
+//STRUCTURE
+html {
+  padding-top: 50px;
+  height: 100%;
+  overflow: hidden;
+  body {
+    font-family: 'Roboto', sans-serif;
+    height: 100%;
+    overflow: hidden;
+    background-color: #484A4E;
+    background-image: url('../img/bg.png');
+    a:link {
+      text-decoration: none;
+    }
+    .row {
+      height: 100%;
+      position: relative;
+    }
+    #ng-view {
+      height: 100%;
+      #main {
+        height: 100%;
+        -webkit-box-shadow: 2px 2px 12px 2px rgba(0, 0, 0, 0.34);
+        -moz-box-shadow: 2px 2px 12px 2px rgba(0, 0, 0, 0.34);
+        box-shadow: 2px 2px 12px 2px rgba(0, 0, 0, 0.34);
+      }
+    }
+  }
+}

@@ -25,7 +25,8 @@
       name: "Anonimo",
       uid: "",
       me: {},
-      admin: false
+      admin: false,
+      uploading: false
     };
 
     //Partner
@@ -34,7 +35,8 @@
     //Notificaciones
     chatCtrl.config = {
       conexNotif: true,
-      svNotif: true
+      svNotif: true,
+      sound: true
     };
 
     //Users array
@@ -101,10 +103,7 @@
 
         //Sub completed
         chatCtrl.channel.bind('pusher:subscription_error', function (members) {
-          $('#alertError')
-            .text("Hubo un error al unirse a la sala, posiblemente la contraseña sea incorrecta");
-          $('#alertModal')
-            .modal('show');
+          toasty.error("Hubo un error al unirse a la sala, posiblemente la contraseña sea incorrecta");
 
           chatCtrl.messages.push({
             "name": "error",
@@ -192,9 +191,8 @@
         return;
       }
       if (file) {
+        chatCtrl.user.uploading = true;
         toasty.wait({msg:"Subiendo archivo", sound:false});
-        $('#photo_unavailable').show();
-        $('#photo_available').hide();
         file.upload = Upload.upload({
           url: 'server/uploadFile.php',
           file: file,
@@ -220,16 +218,14 @@
               msg: response.data.path
             });
 
-            $('#photo_unavailable').hide();
-            $('#photo_available').show();
-
+            chatCtrl.user.uploading = false;
             goBottom(true);
           });
         }, function (response) {
-          if (response.status > 0)
+          if (response.status > 0){
             toasty.error(response.status + ': ' + response.data);
-          $('#photo_unavailable').hide();
-          $('#photo_available').show();
+          }
+          chatCtrl.user.uploading = false;
         }, function (evt) {
           file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
         });
@@ -257,7 +253,7 @@
           .scrollTop($("#chat")[0].scrollHeight);
       }, 10);
 
-      if (sound) toasty('Notificacion');
+      if (sound && chatCtrl.config.sound) toasty('Notificacion');
     }
 
     function getFileExt(mime) {

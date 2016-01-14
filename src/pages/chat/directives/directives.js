@@ -2,7 +2,7 @@
   angular.module('ChatApp.chat.directives', [])
 
     .directive('chatNav', chatNav)
-    .directive('chatModals', chatModals)
+    .directive('configModal', configModal);
 
 //Directives
   function chatNav() {
@@ -11,8 +11,8 @@
     };
   }
 
-  function chatModals() {
+  function configModal() {
     return {
-      templateUrl: 'pages/chat/partials/modals.html'
+      templateUrl: 'pages/chat/partials/configModal.html'
     };
   }
