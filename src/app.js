@@ -27,8 +27,7 @@
       limit: 1,
       timeout: 7000,
       showClose: true,
-      clickToClose: true,
-      class: 'hola'
+      clickToClose: true
     });
   }
 

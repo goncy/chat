@@ -1,9 +1,18 @@
 <div chat-nav></div>
+<script>
+// Pusher.log = function(message) {
+//   if (window.console && window.console.log) {
+//     window.console.log(message);
+//   }
+// };
+$('#msg_input').focus();
+</script>
 <!-- Chat -->
 <div class="container" id="main">
   <div class="row">
     <div id="chat" class="col-md-12 chat">
       <div ng-repeat="msg in chatCtrl.messages">
+
         <!-- Server -->
         <div ng-if="msg.src === 'server'" class="media server">
           <div class="media-body">
@@ -12,18 +21,24 @@
         </div>
 
         <!-- Image -->
-        <div class="col-xs-12" style="padding:0px">
-          <div ng-if="msg.src === 'image'" class="media image col-xs-6 col-sm-4 col-md-3 col-lg-2 clearfix" style="padding:0px;" ng-click="chatCtrl.previewImage(msg.msg,msg.name)">
-            <button class="media image" style="width:100%;height:100%;margin:0px;background-image: url({{msg.msg}});"><span class="label label-info">{{msg.name}}</span></button>
+        <div ng-if="msg.src === 'image'" class="col-xs-12" style="padding:0px">
+          <div style="cursor: pointer" class="media media-cnt col-xs-6 col-sm-4 col-md-3 col-lg-2 clearfix">
+            <div class="media-body">
+              <h5 ng-click="chatCtrl.setPrvt(msg.name, msg.uid)" style="font-weight: bold" class="media-heading name">{{msg.name}}</h5>
+              <button ng-click="chatCtrl.previewImage(msg.msg,msg.name)" class="media image" style="width:100%;height:200px;margin:0px;" ng-style="{'background-image': 'url({{msg.msg}})'}"></button>
+            </div>
           </div>
         </div>
 
         <!-- Video -->
-        <div class="col-xs-12" style="padding:0px">
-          <div ng-if="msg.src === 'video'" class="media video col-xs-6 col-sm-4 col-md-3 col-lg-2 clearfix" style="padding:0px;">
-            <a ng-if="msg.src === 'video'" target="_blank" href="{{msg.msg}}">
-              <button class="media video" style="width:100%;background-color:transparent;height:100%;margin:0px;background-image: url('./img/video.png');"><span class="label label-info">Video de: {{msg.name}}</span></button>
-            </a>
+        <div ng-if="msg.src === 'video'" class="col-xs-12" style="padding:0px">
+          <div style="cursor: pointer" class="media media-cnt col-xs-6 col-sm-4 col-md-3 col-lg-2 clearfix">
+            <div class="media-body">
+              <h5 ng-click="chatCtrl.setPrvt(msg.name, msg.uid)" style="font-weight: bold" class="media-heading name">{{msg.name}}</h5>
+              <a target="_blank" href="{{msg.msg}}">
+                <button class="media video" style="width:100%;background-color:transparent;height:150px;margin:0px;background-image: url('./img/video.png');"></button>
+              </a>
+            </div>
           </div>
         </div>
 
@@ -37,7 +52,7 @@
         <!-- Other -->
         <div ng-if="msg.src === 'other'" class="media other">
           <div class="media-body">
-            <h5 class="media-heading name" style="font-weight: bold"><span ng-style="{'color': msg.color}">{{msg.name}}</span></h5>{{msg.msg}}
+            <h5 class="media-heading name" style="font-weight: bold"><span ng-click="chatCtrl.setPrvt(msg.name, msg.uid)" style="cursor: pointer" ng-style="{'color': msg.color}">{{msg.name}}</span></h5>{{msg.msg}}
           </div>
         </div>
 
@@ -47,9 +62,21 @@
             <h5 class="media-heading" style="font-weight: bold">{{msg.name}}</h5>{{msg.msg}}
           </div>
         </div>
+
+        <!-- Prvt -->
+        <div ng-if="msg.src === 'prvt'" class="col-xs-12" style="padding:0px">
+          <div style="cursor: pointer" class="media prvt clearfix" ng-class="{'col-xs-6 col-sm-4 col-md-3 col-lg-2': msg.media}">
+            <div class="media-body">
+              <h5 ng-click="chatCtrl.setPrvt(msg.name, msg.uid)" style="font-weight: bold" class="media-heading name">{{msg.name}} &gt; {{msg.to.name}}</h5><span ng-hide="msg.media">{{msg.msg}}</span>
+              <button ng-click="chatCtrl.previewImage(msg.msg,msg.name)" ng-if="msg.media === 'image'" class="media image" style="width:100%;height:200px;margin:0px;" ng-style="msg.media === 'image' && {'background-image': 'url({{msg.msg}})'}"></button>
+              <a ng-if="msg.media === 'video'" target="_blank" href="{{msg.msg}}">
+                <button class="media video" style="width:100%;background-color:transparent;height:150px;margin:0px;background-image: url('./img/video.png');"></button>
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
     <!-- Footer -->
     <div id="footer" class="col-md-12 no-gutter">
       <!-- Config -->
@@ -59,24 +86,25 @@
             <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
           </button>
           <!-- Kick -->
-          <button ng-show="chatCtrl.prv.id" class="btn btn-danger" alt="Expulsar persona" type="button">
+          <button ng-show="chatCtrl.prvt.id" class="btn btn-danger" alt="Expulsar persona" type="button">
             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
           </button>
-          <button ng-show="chatCtrl.prv.id" class="btn btn-primary" alt="Cancelar mensaje privado" type="button">
+          <!-- Private -->
+          <button ng-show="chatCtrl.prvt.uid" ng-click="chatCtrl.unSetPrvt()" class="btn btn-primary" alt="Cancelar mensaje privado" type="button">
             <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
           </button>
         </span>
         <!-- Mensaje -->
         <input ng-keyup="$event.keyCode == 13 && chatCtrl.sendMessage()" id="msg_input" type="text" maxlength="500" ng-model="msg" class="form-control" placeholder="Mensaje">
-        <input ng-model="chatCtrl.prv.name" type="text" hidden>
-        <input ng-model="chatCtrl.prv.id" type="text" hidden>
+        <input ng-model="chatCtrl.prvt.name" type="text" hidden>
+        <input ng-model="chatCtrl.prvt.uid" type="text" hidden>
         <span class="input-group-btn">
           <!-- Foto -->
           <input id="imagefile" type="file" style="display:none;" ngf-select="chatCtrl.uploadFiles($file, $invalidFiles)" accept="image/*,video/*" ngf-max-size="30MB" />
-          <button class="btn btn-info" ng-hide="chatCtrl.user.uploading" id="photo_available" onclick="$('#imagefile').click();" type="button">
+          <button class="btn btn-info" ng-hide="chatCtrl.user.uploading" onclick="$('#imagefile').click();" type="button">
             <span class="glyphicon glyphicon-camera" aria-hidden="true"></span>
           </button>
-          <button class="btn btn-warning disabled" ng-show="chatCtrl.user.uploading" id="photo_unavailable" type="button">
+          <button class="btn btn-warning disabled" ng-show="chatCtrl.user.uploading" type="button">
             <span class="glyphicon glyphicon-repeat gly-spin" aria-hidden="true"></span>
           </button>
           <!-- Enviar -->
@@ -86,5 +114,4 @@
     </div>
   </div>
 </div>
-
 <div config-modal config="chatCtrl.config" user="chatCtrl.user"></div>

@@ -15,26 +15,35 @@
     chatCtrl.sendMessage = sendMessage;
     chatCtrl.uploadFiles = uploadFiles;
     chatCtrl.previewImage = previewImage;
+    chatCtrl.setPrvt = setPrvt;
+    chatCtrl.unSetPrvt = unSetPrvt;
 
     //Pusher cfg
     chatCtrl.server = {
-      pusher: [],
-      channel: []
+      pusher: []
+    };
+
+    //Chanels
+    chatCtrl.channels = {
+      room: [],
+      self: [],
+      prvt: []
     };
 
     //Scope
     chatCtrl.user = {
       name: "Anonimo",
       color: getRandomColor(),
-      uid: "",
+      uid: generateUid(10),
       data: {},
       admin: false,
       uploading: false
     };
 
-    chatCtrl.prv = {
+    //Prvt info
+    chatCtrl.prvt = {
       name: "",
-      id: ""
+      uid: ""
     };
 
     //Partner
@@ -78,7 +87,8 @@
       }));
 
       //Channel
-      chatCtrl.server.channel = chatCtrl.server.pusher.subscribe('presence-' + chatCtrl.slug);
+      chatCtrl.channels.room = chatCtrl.server.pusher.subscribe('presence-' + chatCtrl.slug);
+      chatCtrl.channels.self = chatCtrl.server.pusher.subscribe('private-' + chatCtrl.user.uid);
 
       //Partner
       chatCtrl.partner = apiFactory.getPartner() === "true" ? true : false;
@@ -95,11 +105,10 @@
     function bindEvents() {
       chatCtrl.server.pusher.connection.bind('connected', function () {
 
-        chatCtrl.user.uid = chatCtrl.server.pusher.connection.socket_id;
         chatCtrl.user.name = "Anonimo";
 
         //Sub completed
-        chatCtrl.server.channel.bind('pusher:subscription_succeeded', function (members) {
+        chatCtrl.channels.room.bind('pusher:subscription_succeeded', function (members) {
           chatCtrl.user.data = members.me;
           chatCtrl.messages.push({
             "name": "server",
@@ -110,7 +119,7 @@
         });
 
         //Sub completed
-        chatCtrl.server.channel.bind('pusher:subscription_error', function (members) {
+        chatCtrl.channels.room.bind('pusher:subscription_error', function (members) {
           toasty.error("Hubo un error al unirse a la sala, posiblemente la contraseña sea incorrecta");
 
           chatCtrl.messages.push({
@@ -122,7 +131,7 @@
         });
 
         //Se unio alguien
-        chatCtrl.server.channel.bind('pusher:member_added', function (member) {
+        chatCtrl.channels.room.bind('pusher:member_added', function (member) {
           chatCtrl.users.push(member);
           if (chatCtrl.config.conexNotif) chatCtrl.messages.push({
             "name": "server",
@@ -133,7 +142,7 @@
         });
 
         //Se fue alguien
-        chatCtrl.server.channel.bind('pusher:member_removed', function (member) {
+        chatCtrl.channels.room.bind('pusher:member_removed', function (member) {
           chatCtrl.users.splice(chatCtrl.users.indexOf(member), 1);
           if (chatCtrl.config.conexNotif) chatCtrl.messages.push({
             "name": "server",
@@ -143,14 +152,14 @@
           goBottom();
         });
 
-        //Mensaje nuevo de servidor
-        chatCtrl.server.channel.bind('server-new_msg', function (data) {
-          if (chatCtrl.config.svNotif) addMessage(data);
+        //Mensaje nuevo de cliente
+        chatCtrl.channels.room.bind('client-other-msg', function (data) {
+          addMessage(data);
         });
 
-        //Mensaje nuevo de cliente
-        chatCtrl.server.channel.bind('client-new_msg', function (data) {
-          addMessage(data);
+        //Mensaje nuevo privado
+        chatCtrl.channels.self.bind('client-prvt-msg', function (data) {
+          addPrvtMessage(data);
         });
 
       });
@@ -160,21 +169,25 @@
     function sendMessage() {
       if ($scope.msg) {
         var data = {
-          uid: chatCtrl.user.uid,
+          color: chatCtrl.user.color,
           msg: $scope.msg,
           name: chatCtrl.user.name,
-          color: chatCtrl.user.color,
-          admin: chatCtrl.user.admin
+          uid: chatCtrl.user.uid,
+          to: {
+            uid: chatCtrl.prvt.uid || "",
+            name: chatCtrl.prvt.name || ""
+          }
         };
 
-        chatCtrl.server.channel.trigger('client-new_msg', data);
+        if (chatCtrl.prvt.uid) {
+          data.src = "prvt";
+          chatCtrl.channels.prvt.trigger('client-prvt-msg', data);
+        } else {
+          chatCtrl.channels.room.trigger('client-other-msg', data);
+        }
 
-        chatCtrl.messages.push({
-          src: chatCtrl.user.admin ? "admin" : "self",
-          name: "Yo",
-          msg: $scope.msg,
-          color: chatCtrl.user.color
-        });
+        data.src = data.src === "prvt" ? "prvt" : "self";
+        chatCtrl.messages.push(data);
 
         $scope.msg = "";
 
@@ -185,10 +198,27 @@
     function addMessage(data) {
       data.src = data.src || "other";
       chatCtrl.messages.push({
-        src: data.admin ? "admin" : data.src,
-        name: data.name,
+        color: data.color,
         msg: data.msg,
-        color: data.color
+        name: data.name,
+        src: data.admin ? "admin" : data.src,
+        uid: data.uid
+      });
+      goBottom(true);
+    }
+
+    function addPrvtMessage(data) {
+      chatCtrl.messages.push({
+        color: data.color,
+        media: data.media || "",
+        msg: data.msg,
+        name: data.name,
+        src: "prvt",
+        to: {
+          uid: data.to.uid,
+          name: data.to.name
+        },
+        uid: data.uid
       });
       goBottom(true);
     }
@@ -203,7 +233,10 @@
       }
       if (file) {
         chatCtrl.user.uploading = true;
-        toasty.wait({msg:"Subiendo archivo", sound:false});
+        toasty.wait({
+          msg: "Subiendo archivo",
+          sound: false
+        });
         file.upload = Upload.upload({
           url: 'server/uploadFile.php',
           file: file,
@@ -216,25 +249,32 @@
             var fileType = getFileExt(response.data.tipo);
 
             var data = {
-              uid: chatCtrl.user.uid,
-              src: fileType,
+              color: chatCtrl.user.color,
               msg: response.data.path,
               name: chatCtrl.user.name,
-              color: chatCtrl.user.color
+              media: fileType,
+              to: {
+                uid: chatCtrl.prvt.uid || "",
+                name: chatCtrl.prvt.name || ""
+              },
+              uid: chatCtrl.user.uid
             };
 
-            chatCtrl.server.channel.trigger('client-new_msg', data);
-            chatCtrl.messages.push({
-              src: fileType,
-              name: "Yo",
-              msg: response.data.path
-            });
+            if (chatCtrl.prvt.uid) {
+              data.src = "prvt";
+              chatCtrl.channels.prvt.trigger('client-prvt-msg', data);
+            } else {
+              data.src = fileType;
+              chatCtrl.channels.room.trigger('client-other-msg', data);
+            }
+
+            chatCtrl.messages.push(data);
 
             chatCtrl.user.uploading = false;
             goBottom(true);
           });
         }, function (response) {
-          if (response.status > 0){
+          if (response.status > 0) {
             toasty.error(response.status + ': ' + response.data);
           }
           chatCtrl.user.uploading = false;
@@ -252,6 +292,23 @@
         padding: 5,
         closeBtn: true
       });
+    }
+
+    function setPrvt(name, uid) {
+      if (uid !== chatCtrl.user.uid) {
+        chatCtrl.prvt.name = name;
+        chatCtrl.prvt.uid = uid;
+
+        chatCtrl.channels.prvt = chatCtrl.server.pusher.subscribe('private-' + uid);
+      }
+    }
+
+    function unSetPrvt() {
+      chatCtrl.channels.prvt = [];
+      chatCtrl.server.pusher.unsubscribe('private-' + chatCtrl.prvt.uid);
+
+      chatCtrl.prvt.name = "";
+      chatCtrl.prvt.uid = "";
     }
 
     //Helpers
@@ -277,10 +334,20 @@
     function getRandomColor() {
       var letters = '0123456789ABCDEF'.split('');
       var color = '#';
-      for (var i = 0; i < 6; i++ ) {
-          color += letters[Math.floor(Math.random() * 16)];
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
       }
       return color;
+    }
+
+    function generateUid(lgt) {
+      var text = "";
+      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+      for (var i = 0; i < lgt; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+      return text;
     }
   }
 })();

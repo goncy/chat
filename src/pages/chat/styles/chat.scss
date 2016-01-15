@@ -1,15 +1,14 @@
 /* CHATS */
-  .chat {
-    height: -webkit-calc(100% - 43px);
-    height: -moz-calc(100% - 43px);
-    height: calc(100% - 43px);
-    overflow-y: auto;
-    background: #F0F7ED;
-    background-image: url('../img/bg.png');
-    .media {
-      padding: 10px 10px 10px 10px;
-      margin-bottom: 15px;
-    }
-
-    @import "messages";
+.chat {
+  height: -webkit-calc(100% - 43px);
+  height: -moz-calc(100% - 43px);
+  height: calc(100% - 43px);
+  overflow-y: auto;
+  background: #F0F7ED;
+  background-image: url('../img/bg.png');
+  .media {
+    padding: 10px 10px 10px 10px;
+    margin-bottom: 15px;
   }
+  @import "messages";
+}
