@@ -23,7 +23,7 @@ $('#msg_input').focus();
         <!-- Admin -->
         <div ng-if="msg.src === 'admin'" class="media admin">
           <div class="media-body">
-            <h5 class="media-heading" style="font-weight: bold">{{msg.name}}</h5>{{msg.msg}}
+            <h5 class="media-heading" style="font-weight: bold"><span ng-click="chatCtrl.setPrvt(msg.name, msg.uid)">{{msg.name}}</span></h5>{{msg.msg}}
           </div>
         </div>
 
