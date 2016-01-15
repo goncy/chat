@@ -264,7 +264,7 @@
               data.src = "prvt";
               chatCtrl.channels.prvt.trigger('client-prvt-msg', data);
             } else {
-              data.src = fileType;
+              data.src = "media";
               chatCtrl.channels.room.trigger('client-other-msg', data);
             }
 

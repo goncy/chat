@@ -20,25 +20,10 @@ $('#msg_input').focus();
           </div>
         </div>
 
-        <!-- Image -->
-        <div ng-if="msg.src === 'image'" class="col-xs-12" style="padding:0px">
-          <div style="cursor: pointer" class="media media-cnt col-xs-6 col-sm-4 col-md-3 col-lg-2 clearfix">
-            <div class="media-body">
-              <h5 ng-click="chatCtrl.setPrvt(msg.name, msg.uid)" style="font-weight: bold" class="media-heading name">{{msg.name}}</h5>
-              <button ng-click="chatCtrl.previewImage(msg.msg,msg.name)" class="media image" style="width:100%;height:200px;margin:0px;" ng-style="{'background-image': 'url({{msg.msg}})'}"></button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Video -->
-        <div ng-if="msg.src === 'video'" class="col-xs-12" style="padding:0px">
-          <div style="cursor: pointer" class="media media-cnt col-xs-6 col-sm-4 col-md-3 col-lg-2 clearfix">
-            <div class="media-body">
-              <h5 ng-click="chatCtrl.setPrvt(msg.name, msg.uid)" style="font-weight: bold" class="media-heading name">{{msg.name}}</h5>
-              <a target="_blank" href="{{msg.msg}}">
-                <button class="media video" style="width:100%;background-color:transparent;height:150px;margin:0px;background-image: url('./img/video.png');"></button>
-              </a>
-            </div>
+        <!-- Admin -->
+        <div ng-if="msg.src === 'admin'" class="media admin">
+          <div class="media-body">
+            <h5 class="media-heading" style="font-weight: bold">{{msg.name}}</h5>{{msg.msg}}
           </div>
         </div>
 
@@ -56,13 +41,6 @@ $('#msg_input').focus();
           </div>
         </div>
 
-        <!-- Admin -->
-        <div ng-if="msg.src === 'admin'" class="media admin">
-          <div class="media-body">
-            <h5 class="media-heading" style="font-weight: bold">{{msg.name}}</h5>{{msg.msg}}
-          </div>
-        </div>
-
         <!-- Prvt -->
         <div ng-if="msg.src === 'prvt'" class="col-xs-12" style="padding:0px">
           <div style="cursor: pointer" class="media prvt clearfix" ng-class="{'col-xs-6 col-sm-4 col-md-3 col-lg-2': msg.media}">
@@ -75,6 +53,20 @@ $('#msg_input').focus();
             </div>
           </div>
         </div>
+
+        <!-- Media -->
+        <div ng-if="msg.src === 'media'" class="col-xs-12" style="padding:0px">
+          <div style="cursor: pointer" class="media media-cnt col-xs-6 col-sm-4 col-md-3 col-lg-2 clearfix">
+            <div class="media-body">
+              <h5 ng-click="chatCtrl.setPrvt(msg.name, msg.uid)" style="font-weight: bold" class="media-heading name">{{msg.name}}</h5>
+              <button ng-if="msg.media === 'image'" ng-click="chatCtrl.previewImage(msg.msg,msg.name)" class="media image" style="width:100%;height:200px;margin:0px;" ng-style="{'background-image': 'url({{msg.msg}})'}"></button>
+              <a ng-if="msg.media === 'video'" target="_blank" href="{{msg.msg}}">
+                <button class="media video" style="width:100%;background-color:transparent;height:150px;margin:0px;background-image: url('./img/video.png');"></button>
+              </a>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
     <!-- Footer -->

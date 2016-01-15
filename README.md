@@ -19,6 +19,5 @@ Tecnologias usadas: Angular.js, PHP, librerias para ambos lenguajes, comunicacio
 # TODO
 
 * Mensajes privados para administradores
-* Fotos por privado
 * Mejorar deteccion de administrador
 * Testing
