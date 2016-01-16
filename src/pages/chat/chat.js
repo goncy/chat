@@ -168,7 +168,8 @@
     //Messages functions
     function sendMessage() {
       if ($scope.msg) {
-        var data = {
+        var data = buildMsg({
+          admin: chatCtrl.user.admin,
           color: chatCtrl.user.color,
           msg: $scope.msg,
           name: chatCtrl.user.name,
@@ -177,7 +178,7 @@
             uid: chatCtrl.prvt.uid || "",
             name: chatCtrl.prvt.name || ""
           }
-        };
+        });
 
         if (chatCtrl.prvt.uid) {
           data.src = "prvt";
@@ -363,6 +364,7 @@
 
     function buildMsg(msg) {
       return $.extend({
+        admin: false,
         color: "#000",
         msg: "?",
         name: "Anonimo",
