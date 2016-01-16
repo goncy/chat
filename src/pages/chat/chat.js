@@ -1,4 +1,4 @@
-(function () {
+(function() {
   'use strict';
 
   //Module
@@ -30,14 +30,21 @@
       prvt: []
     };
 
-    //Scope
+    //User
     chatCtrl.user = {
-      name: "Anonimo",
+      name: "" || "Anonimo",
       color: getRandomColor(),
       uid: generateUid(10),
       data: {},
       admin: false,
       uploading: false
+    };
+
+    //Notificaciones
+    chatCtrl.config = {
+      conexNotif: true,
+      svNotif: true,
+      sound: true
     };
 
     //Prvt info
@@ -49,20 +56,11 @@
     //Partner
     chatCtrl.partner = false;
 
-    //Notificaciones
-    chatCtrl.config = {
-      conexNotif: true,
-      svNotif: true,
-      sound: true
-    };
-
     //Users array
     chatCtrl.users = [];
 
     //Chat content
     chatCtrl.messages = [];
-
-    iniciar();
 
     function iniciar() {
       //Chat name
@@ -93,7 +91,7 @@
       //Partner
       chatCtrl.partner = apiFactory.getPartner() === "true" ? true : false;
 
-      $scope.$on('$destroy', function () {
+      $scope.$on('$destroy', function() {
         apiFactory.reset();
         chatCtrl.server.pusher.disconnect();
       });
@@ -103,12 +101,12 @@
     }
 
     function bindEvents() {
-      chatCtrl.server.pusher.connection.bind('connected', function () {
+      chatCtrl.server.pusher.connection.bind('connected', function() {
 
         chatCtrl.user.name = "Anonimo";
 
         //Sub completed
-        chatCtrl.channels.room.bind('pusher:subscription_succeeded', function (members) {
+        chatCtrl.channels.room.bind('pusher:subscription_succeeded', function(members) {
           chatCtrl.user.data = members.me;
           chatCtrl.messages.push({
             "name": "server",
@@ -119,7 +117,7 @@
         });
 
         //Sub completed
-        chatCtrl.channels.room.bind('pusher:subscription_error', function (members) {
+        chatCtrl.channels.room.bind('pusher:subscription_error', function(members) {
           toasty.error("Hubo un error al unirse a la sala, posiblemente la contraseña sea incorrecta");
 
           chatCtrl.messages.push({
@@ -131,7 +129,7 @@
         });
 
         //Se unio alguien
-        chatCtrl.channels.room.bind('pusher:member_added', function (member) {
+        chatCtrl.channels.room.bind('pusher:member_added', function(member) {
           chatCtrl.users.push(member);
           if (chatCtrl.config.conexNotif) chatCtrl.messages.push({
             "name": "server",
@@ -142,7 +140,7 @@
         });
 
         //Se fue alguien
-        chatCtrl.channels.room.bind('pusher:member_removed', function (member) {
+        chatCtrl.channels.room.bind('pusher:member_removed', function(member) {
           chatCtrl.users.splice(chatCtrl.users.indexOf(member), 1);
           if (chatCtrl.config.conexNotif) chatCtrl.messages.push({
             "name": "server",
@@ -153,17 +151,19 @@
         });
 
         //Mensaje nuevo de cliente
-        chatCtrl.channels.room.bind('client-other-msg', function (data) {
+        chatCtrl.channels.room.bind('client-other-msg', function(data) {
           addMessage(data);
         });
 
         //Mensaje nuevo privado
-        chatCtrl.channels.self.bind('client-prvt-msg', function (data) {
+        chatCtrl.channels.self.bind('client-prvt-msg', function(data) {
           addPrvtMessage(data);
         });
 
       });
     }
+
+    iniciar();
 
     //Messages functions
     function sendMessage() {
@@ -199,6 +199,7 @@
       data.src = data.src || "other";
       chatCtrl.messages.push({
         color: data.color,
+        media: data.media || "",
         msg: data.msg,
         name: data.name,
         src: data.admin ? "admin" : data.src,
@@ -233,54 +234,64 @@
       }
       if (file) {
         chatCtrl.user.uploading = true;
+
         toasty.wait({
           msg: "Subiendo archivo",
           sound: false
         });
+
         file.upload = Upload.upload({
           url: 'server/uploadFile.php',
           file: file,
           sendFieldsAs: 'form'
         });
-        file.upload.then(function (response) {
-          $timeout(function () {
-            file.result = response.data;
 
-            var fileType = getFileExt(response.data.tipo);
+        file.upload.then(uploadSuccess, uploadError, uploadProgress);
+      }
 
-            var data = {
-              color: chatCtrl.user.color,
-              msg: response.data.path,
-              name: chatCtrl.user.name,
-              media: fileType,
-              to: {
-                uid: chatCtrl.prvt.uid || "",
-                name: chatCtrl.prvt.name || ""
-              },
-              uid: chatCtrl.user.uid
-            };
+      function uploadSuccess(response) {
+        $timeout(function() {
+          file.result = response.data;
 
-            if (chatCtrl.prvt.uid) {
-              data.src = "prvt";
-              chatCtrl.channels.prvt.trigger('client-prvt-msg', data);
-            } else {
-              data.src = "media";
-              chatCtrl.channels.room.trigger('client-other-msg', data);
-            }
+          var fileType = getFileExt(response.data.tipo);
 
-            chatCtrl.messages.push(data);
-
-            chatCtrl.user.uploading = false;
-            goBottom(true);
+          var data = buildMsg({
+            color: chatCtrl.user.color,
+            msg: response.data.path,
+            name: chatCtrl.user.name,
+            media: fileType,
+            to: {
+              uid: chatCtrl.prvt.uid || "",
+              name: chatCtrl.prvt.name || ""
+            },
+            uid: chatCtrl.user.uid
           });
-        }, function (response) {
-          if (response.status > 0) {
-            toasty.error(response.status + ': ' + response.data);
+
+          if (chatCtrl.prvt.uid) {
+            data.src = "prvt";
+            chatCtrl.channels.prvt.trigger('client-prvt-msg', data);
+          } else {
+            data.src = "media";
+            chatCtrl.channels.room.trigger('client-other-msg', data);
           }
+
+          data.name = "Yo (" + chatCtrl.user.name + ")";
+          chatCtrl.messages.push(data);
+
           chatCtrl.user.uploading = false;
-        }, function (evt) {
-          file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+          goBottom(true);
         });
+      }
+
+      function uploadError(response) {
+        if (response.status > 0) {
+          toasty.error(response.status + ': ' + response.data);
+        }
+        chatCtrl.user.uploading = false;
+      }
+
+      function uploadProgress(evt) {
+        file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
       }
     }
 
@@ -317,7 +328,7 @@
     }
 
     function goBottom(sound) {
-      setTimeout(function () {
+      setTimeout(function() {
         $("#chat")
           .scrollTop($("#chat")[0].scrollHeight);
       }, 10);
@@ -348,6 +359,21 @@
         text += possible.charAt(Math.floor(Math.random() * possible.length));
 
       return text;
+    }
+
+    function buildMsg(msg) {
+      return $.extend({
+        color: "#000",
+        msg: "?",
+        name: "Anonimo",
+        media: "",
+        src: "",
+        to: {
+          uid: "",
+          name: "Anonimo"
+        },
+        uid: ""
+      }, msg);
     }
   }
 })();

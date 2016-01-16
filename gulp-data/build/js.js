@@ -22,9 +22,9 @@ gulp.task('build:js', function () {
     .pipe(jsFilter)
     .pipe(concat('vendor.js')),
 
-  appFiles = gulp.src(['./src/pages/**/*.{js,coffee}', './src/app.js', './src/components/**/*.{js,coffee}'])
-    .pipe(angularFileSort())
+  appFiles = gulp.src(['./src/pages/**/*.{js,coffee}', './src/app.js', './src/components/**/*.{js,coffee}'], {base: "src"})
     .pipe(sourcemaps.init())
+    .pipe(angularFileSort())
     .pipe(concat('app.js'))
     .pipe(sourcemaps.write());
 

@@ -30,7 +30,7 @@ $('#msg_input').focus();
         <!-- Self -->
         <div ng-if="msg.src === 'self'" class="media self">
           <div class="media-body">
-            <h5 class="media-heading name" style="font-weight: bold"><span ng-style="{'color': msg.color}">Yo</span></h5>{{msg.msg}}
+            <h5 class="media-heading name" style="font-weight: bold"><span ng-style="{'color': msg.color}">Yo ({{chatCtrl.user.name}})</span></h5>{{msg.msg}}
           </div>
         </div>
 

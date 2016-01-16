@@ -4,7 +4,7 @@
         $servidor   = "localhost";
         $nombreBD   = "chat";
         $usuario    = "root";
-        $contrasena = "root";
+        $contrasena = "";
         //Creando la conexión, nuevo objeto mysqli
         $conexion = new mysqli($servidor,$usuario,$contrasena,$nombreBD);
         $conexion->set_charset('utf8mb4');
