@@ -19,4 +19,5 @@ Tecnologias usadas: Angular.js, PHP, librerias para ambos lenguajes, comunicacio
 
 * Mejorar deteccion de administrador
 * Testing
-* Kick
+* Ban
+* Modularizar

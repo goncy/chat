@@ -15,8 +15,9 @@
       password: ""
     };
 
-    api.hasPassword = hasPassword;
     api.login = login;
+    api.kick = kick;
+    api.hasPassword = hasPassword;
     api.setPassword = setPassword;
     api.getPassword = getPassword;
     api.setPartner = setPartner;
@@ -35,6 +36,14 @@
           sala: sala.toLowerCase(),
           password: password || "",
           action: "login"
+        });
+    }
+
+    function kick(uid, channel){
+      return $http.post('server/eventHandler.php', {
+          action: "kick",
+          channel: channel,
+          uid: uid
         });
     }
 

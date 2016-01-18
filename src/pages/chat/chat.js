@@ -17,6 +17,7 @@
     chatCtrl.previewImage = previewImage;
     chatCtrl.setPrvt = setPrvt;
     chatCtrl.unSetPrvt = unSetPrvt;
+    chatCtrl.kickUser = kickUser;
 
     //Pusher cfg
     chatCtrl.server = {
@@ -148,6 +149,21 @@
             "src": "server"
           });
           goBottom();
+        });
+
+        //Kick user
+        chatCtrl.channels.room.bind('kick', function(data) {
+          if (data.uid === chatCtrl.user.uid) {
+            apiFactory.reset();
+            chatCtrl.server.pusher.disconnect();
+            toasty.error("Fuiste expulsado de la sala");
+
+            chatCtrl.messages.push({
+              "name": "server",
+              "msg": "Fuiste expulsado de la sala",
+              "src": "server"
+            });
+          }
         });
 
         //Mensaje nuevo de cliente
@@ -304,6 +320,15 @@
         padding: 5,
         closeBtn: true
       });
+    }
+
+    function kickUser() {
+      if (chatCtrl.user.admin) {
+        apiFactory.kick(chatCtrl.prvt.uid, chatCtrl.slug);
+
+        chatCtrl.prvt.name = "";
+        chatCtrl.prvt.uid = "";
+      }
     }
 
     function setPrvt(name, uid) {

@@ -11,4 +11,14 @@ $pusher = new Pusher(
   $app_id,
   array('encrypted' => true)
 );
+
+$postdata = file_get_contents("php://input");
+$request = json_decode($postdata,true);
+
+if($request['action'] === "kick"){
+  $preChannel = 'presence-' . $request['channel'];
+
+  $pusher->trigger($preChannel, 'kick', array( 'uid' => $request['uid']));
+  echo $preChannel;
+}
 ?>

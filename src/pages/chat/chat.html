@@ -78,7 +78,7 @@ $('#msg_input').focus();
             <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
           </button>
           <!-- Kick -->
-          <button ng-show="chatCtrl.prvt.id" class="btn btn-danger" alt="Expulsar persona" type="button">
+          <button ng-show="chatCtrl.prvt.uid && chatCtrl.user.admin" class="btn btn-danger" ng-click="chatCtrl.kickUser()" alt="Expulsar persona" type="button">
             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
           </button>
           <!-- Private -->
