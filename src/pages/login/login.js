@@ -16,12 +16,13 @@
     iniciar();
 
     function iniciar() {
-      hasPassword();
+      checkSala();
     }
 
-    function hasPassword() {
-      apiFactory.hasPassword($routeParams.sala.toLowerCase())
+    function checkSala() {
+      apiFactory.checkSala($routeParams.sala.toLowerCase())
         .then(function (res) {
+          apiFactory.setPartner(res.data.partner);
           if (res.data.status === "false") {
             $location.path('/' + $routeParams.sala.toLowerCase() + '/chat');
           }else{
@@ -35,7 +36,6 @@
         .then(function (res) {
           if (res.data.status === "true") {
             apiFactory.setPassword($scope.password);
-            apiFactory.setPartner(res.data.partner);
             $location.path('/' + $routeParams.sala.toLowerCase() + '/chat');
           } else {
             alert("Error, la password no es correcta o hubo un error con el servidor");

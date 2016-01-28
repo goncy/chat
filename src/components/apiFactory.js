@@ -17,17 +17,17 @@
 
     api.login = login;
     api.kick = kick;
-    api.hasPassword = hasPassword;
+    api.checkSala = checkSala;
     api.setPassword = setPassword;
     api.getPassword = getPassword;
     api.setPartner = setPartner;
     api.getPartner = getPartner;
     api.reset = reset;
 
-    function hasPassword(sala) {
+    function checkSala(sala) {
       return $http.post('server/login.php', {
           sala: sala.toLowerCase(),
-          action: "hasPassword"
+          action: "checkSala"
         });
     }
 
