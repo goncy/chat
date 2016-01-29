@@ -21,4 +21,4 @@ Tecnologias usadas: Angular.js, PHP, librerias para ambos lenguajes, comunicacio
 * Testing
 * Ban
 * Modularizar
-* Enter para cambiar de sala
+* Enter para cambiar de sala (Borrar contenido de la ventana [Reload])
