@@ -14,7 +14,7 @@ $request = json_decode($postdata,true);
 if(!isset( $request['sala'])){
 	echo "Ingrese una sala por favor";
 }else{
-	if($request['action'] === "hasPassword"){
+	if($request['action'] === "checkSala"){
 		$sala = $request['sala'];
 
 		$stmt = $con->prepare("SELECT passsala,COUNT(*) as existe FROM salas WHERE nombre = ?");
@@ -26,6 +26,10 @@ if(!isset( $request['sala'])){
 		$devolucion = [];
 
 		while ($stmt-> fetch()) {
+			if ($col2 > 0) {
+				$devolucion['partner'] = "true";
+			}
+
 			if(empty($col1) || $col2 < 1){
 				$devolucion['status'] = "false";
 			}else{

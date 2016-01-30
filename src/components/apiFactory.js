@@ -15,18 +15,19 @@
       password: ""
     };
 
-    api.hasPassword = hasPassword;
     api.login = login;
+    api.kick = kick;
+    api.checkSala = checkSala;
     api.setPassword = setPassword;
     api.getPassword = getPassword;
     api.setPartner = setPartner;
     api.getPartner = getPartner;
     api.reset = reset;
 
-    function hasPassword(sala) {
+    function checkSala(sala) {
       return $http.post('server/login.php', {
           sala: sala.toLowerCase(),
-          action: "hasPassword"
+          action: "checkSala"
         });
     }
 
@@ -35,6 +36,14 @@
           sala: sala.toLowerCase(),
           password: password || "",
           action: "login"
+        });
+    }
+
+    function kick(uid, channel){
+      return $http.post('server/eventHandler.php', {
+          action: "kick",
+          channel: channel,
+          uid: uid
         });
     }
 
